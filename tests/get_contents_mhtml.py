@@ -30,6 +30,10 @@ for counting in range(20):
     if target is None:
         break
     target_soup = BeautifulSoup(target.prettify(), 'html.parser')
+    for tag in target_soup.find_all(["br"]):
+        tag.decompose()
     rate_info.append(target_soup)
     
 print(rate_info)
+print("*"*20)
+print(rate_info[0].find("p").text)
