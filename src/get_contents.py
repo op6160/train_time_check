@@ -14,5 +14,5 @@ for counting in range(20):
         break
     target_soup = BeautifulSoup(target.prettify(), 'html.parser')
     rate_info.append(target_soup)
-    
+
 print(rate_info)
