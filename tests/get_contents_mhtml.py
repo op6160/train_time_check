@@ -20,7 +20,7 @@ def parse_mhtml_to_soup(mhtml_content):
     else:
         return None
 
-with open("./test.mhtml", 'r', encoding='utf-8') as f:
+with open("tests/dev.test.mhtml", 'r', encoding='utf-8') as f:
     mhtml_text = f.read()
     soup = parse_mhtml_to_soup(mhtml_text)
 
