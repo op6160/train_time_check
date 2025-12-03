@@ -33,7 +33,16 @@ def text_squash(text):
     text = text.replace("\t", "")
     text = text.replace("\n\n", " ")
     text = text.replace("\n", " ")
-    return text
+    return text.strip()
+
+def hard_coding_logic(rate_info):
+    result = []
+    for info in rate_info:
+        if info[0] == "【":
+            result.append(info)
+        else:
+            result[-1] += info
+    return result
 
 rate_info = []
 for counting in range(20):
@@ -46,9 +55,12 @@ for counting in range(20):
     rate_info_div_soup_text = rate_info_div_soup.find("p").text
     rate_info_div_soup_text = text_squash(rate_info_div_soup_text)
     rate_info.append(rate_info_div_soup_text)
+    rate_info = hard_coding_logic(rate_info)
 
 # print(rate_info)
 print("*"*20)
 print("rate_info: ")
-print(rate_info[0]) # .find("p").text
+for rate in rate_info:
+    print(rate)
+# print(rate_info[0]) # .find("p").text
 print("*"*20)
