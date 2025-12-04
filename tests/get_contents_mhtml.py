@@ -283,9 +283,9 @@ def get_train_level(train_type):
     else:
         return "unknown"
 
-rate_time_find = soup.find_all("div", id = re_form("okure-jikan-ja", ""))
+rate_time_soup_find = soup.find_all("div", id = re_form("okure-jikan-ja", ""))
 
-for data in rate_time_find:
+for data in rate_time_soup_find:
     if data.text:
         eki_n = data.find_parents(id = re_form(r"eki_\d"))
         
