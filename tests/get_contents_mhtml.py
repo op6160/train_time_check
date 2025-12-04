@@ -78,6 +78,9 @@ def list_sort_by_titile(rate_info):
             result[-1] += info
     return result
 
+def re_form(startswith = "", endswith = ""):
+    return re.compile(r'^'+startswith+r'*'+endswith)
+
 def list_processing(soup):
     """
     XXX: hard code
@@ -214,18 +217,21 @@ go_up_title = go_up_info[0]
 
 # * * * * * * code for test * * * * * * #
 # no parsed data 
-print("*"*20)
-print("rate_info: ")
-for rate in rate_info:
-    print(rate)
-print("*"*20)
-# if state == up
-print("up down info")
-log(write_state_message(go_up_info, "up"))
-# if state == down
-log(write_state_message(go_down_info, "down"))
+
+# print("*"*20)
+# print("rate_info: ")
+# for rate in rate_info:
+#     print(rate)
+# print("*"*20)
+# # if state == up
+# print("up down info")
+# log(write_state_message(go_up_info, "up"))
+# # if state == down
+# log(write_state_message(go_down_info, "down"))
+
 # * * * * * * = = = = = = = * * * * * * #
 ####################################################################################################################
+
 # station, train
 " eki_n_senro\n",
 "    eki_list\n",
@@ -240,7 +246,72 @@ log(write_state_message(go_down_info, "down"))
 "                            kindn-1-1-1: 열차종류\n",
 "                            ikisakin-1-1-1: 가는곳"
 
+# logical flow
+if go_down_title:
+    # TODO: do direction down's data check
+    pass
+if go_up_title:
+    # TODO: do direction up's data check
+    pass
 
 from station import stationID as stations
-station_names = list(stations.keys())
 
+def find_station_by_id(id):
+    for name, values in stations.items():
+        if values["id"] == id:
+            return name, values
+
+new_data = soup.find_all("div", id = re_form("okure-jikan-ja", ""))
+for data in new_data:
+    if data.text:
+        # eki_nn = data.find_parent(id = re_form(r"eki_\d","senro"))
+        eki_n = data.find_parents(id = re_form(r"eki_\d"))
+        station_number_id = eki_n[-1]["id"]
+        station_space_number_id = eki_n[1]["id"]
+        train_number_id = data["id"]
+        train_rate_time_str = data.text
+
+        station_id = int(station_number_id.replace("eki_",""))
+        station_name, ___ = find_station_by_id(station_id)
+        # 1-l-1 도중 0-l-1 정차
+        # 1,0,-x-x : 1=역밖, 0=역내
+        # x-l,r-x : l=왼쪽(상행 down), r=오른쪽(하행 up)
+        # 3번째는 아직 표본이 없고, 전부 1이었음
+        # r인 경우, x 에서 x + 1 역을 향해 가는중
+        # l인 경우, x-1에서 x 역을 향해 가는 중
+        train_params_string = train_number_id[-5:]
+        tps = {"on_station": train_params_string[0],
+                "direction": train_params_string[2],
+                "unknown_value": train_params_string[4]}
+        
+        print(tps)
+        # basic
+        if tps["on_station"] == "1" and tps["direction"] == "l":
+            from_station_id = station_id + 1
+            to_station_id = station_id
+            from_station_name, ___ = find_station_by_id(from_station_id)
+            to_station_name, ___ = find_station_by_id(to_station_id)
+        elif tps["on_station"] == "0" and tps["direction"] == "l":
+            from_station_id = station_id
+            to_station_id = station_id - 1
+            from_station_name, ___ = find_station_by_id(from_station_id)
+            to_station_name, ___ = find_station_by_id(to_station_id)
+        elif tps["direction"] == "r":
+            from_station_id = station_id
+            to_station_id = station_id + 1
+            from_station_name, ___ = find_station_by_id(from_station_id)
+            to_station_name, ___ = find_station_by_id(to_station_id)
+
+        print(from_station_name, end="\t->")
+        print(to_station_name, end="\t")
+        print(station_number_id+"\t:", end="\t")
+        print(station_space_number_id+"\t:", end="\t")
+        print(train_number_id+"\t:", end="\t")
+        print(train_rate_time_str)
+# TODO: station_space_number_id에서
+# l인 경우 x-1역명, x역명 (x-1 to x)
+# r인 경우 x역명, x+1역명 (x to x+1)
+
+# 1-l의 경우, x+1 역에서 x 역을 향하는 중
+# 0-l의 경우, x 역에서 x-1 역을 향하는 중
+# n-r의 경우, x 역에서 x+1 역을 향하는 중
