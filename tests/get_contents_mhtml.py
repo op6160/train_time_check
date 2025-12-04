@@ -232,20 +232,6 @@ log(write_state_message(go_down_info, "down"))
 # * * * * * * = = = = = = = * * * * * * #
 ####################################################################################################################
 
-# station, train
-" eki_n_senro\n",
-"    eki_list\n",
-"        eki-list(ul, class) \n",
-"            warp-01(li class) \n",
-"                eki_n-1-0-cont, \n",
-"                eki_n-r-0-cont\n",
-"                    ressha-inner(class) \n",
-"                        eki_n-1-1-1 img =\"https://traininfo.jr-central.co.jp/zairaisen/img/hp_ressha_shinkaisoku.svg\"\n",
-"                        okure-jikan-jan-1-1-1\n",
-"                        side-5-1-1-1\n",
-"                            kindn-1-1-1: 열차종류\n",
-"                            ikisakin-1-1-1: 가는곳"
-
 # logical flow
 if go_down_title:
     # TODO: do direction down's data check
@@ -261,57 +247,32 @@ def find_station_by_id(id):
         if values["id"] == id:
             return name, values
 
-def get_train_type(data):
-    train_type_img = data.parent.find("img")
-    img_src = train_type_img["src"]
-    src_filename = img_src[:-4]
-    src_filename_nopath = src_filename.split("/")[-1]
-    train_type = src_filename_nopath.split("_")[-1]
-    return train_type
+def get_train_info(data):
+    def get_train_type(data):
+    # train_type_img = data.parent.find("img")["src"][:-4].split("/")[-1].split("_")[-1]
+        train_type_img = data.parent.find("img")
+        img_src = train_type_img["src"]
+        src_filename = img_src[:-4]
+        src_filename_nopath = src_filename.split("/")[-1]
+        train_type = src_filename_nopath.split("_")[-1]
+        return train_type
 
-def get_train_level(train_type):
-    if train_type == "normal":
-        return 0
-    elif train_type == "kukankaisoku":
-        return 1
-    elif train_type == "kaisoku":
-        return 2
-    elif train_type == "shinkaisoku":
-        return 3
-    elif train_type == "tokubetsukaisoku":
-        return 4
-    else:
-        return "unknown"
+    def get_train_level(train_type):
+        if train_type == "normal":
+            return 0
+        elif train_type == "kukankaisoku":
+            return 1
+        elif train_type == "kaisoku":
+            return 2
+        elif train_type == "shinkaisoku":
+            return 3
+        elif train_type == "tokubetsukaisoku":
+            return 4
+        else:
+            return "unknown"
 
-rate_time_soup_find = soup.find_all("div", id = re_form("okure-jikan-ja", ""))
-
-for data in rate_time_soup_find:
-    if data.text:
-        eki_n = data.find_parents(id = re_form(r"eki_\d"))
-        
-        # train_type_img = data.parent.find("img")["src"][:-4].split("/")[-1].split("_")[-1]
-        train_type = get_train_type(data)
-        train_level = get_train_level(train_type)
-        
-        station_number_id = eki_n[-1]["id"]
-        station_space_number_id = eki_n[1]["id"]
-        train_number_id = data["id"]
-        train_rate_time_str = data.text
-
-        station_id = int(station_number_id.replace("eki_",""))
-        station_name, ___ = find_station_by_id(station_id)
-        # 1-l-1 도중 0-l-1 정차
-        # 1,0,-x-x : 1=역밖, 0=역내
-        # x-l,r-x : l=왼쪽(상행 down), r=오른쪽(하행 up)
-        # 3번째는 아직 표본이 없고, 전부 1이었음
-        # r인 경우, x 에서 x + 1 역을 향해 가는중
-        # l인 경우, x-1에서 x 역을 향해 가는 중
-        train_params_string = train_number_id[-5:]
-        # train_params
-        tps = {"on_station": train_params_string[0],
-                "direction": train_params_string[2],
-                "unknown_value": train_params_string[4]}
-        # basic
+    def set_from_to_staion_id(tps):
+        # if train is normal
         if tps["on_station"] == "1" and tps["direction"] == "l":
             from_station_id = station_id + 1
             to_station_id = station_id
@@ -327,23 +288,95 @@ for data in rate_time_soup_find:
             to_station_id = station_id + 1
             from_station_name, ___ = find_station_by_id(from_station_id)
             to_station_name, ___ = find_station_by_id(to_station_id)
+        else:
+            raise Exception("Invalid train params")
+        # if train is kaisoku
+        # if train is kukankaisoku
+        # if train is shinkaisoku
+        # if train in tokubetsukaisoku
+        # else(unknown)
+        # TODO: 열차 등급에 따라서, 정차역 기준, 역명을 알아내는 로직
+        return from_station_name, to_station_name    
+    
+    # find id "eki_n" div
+    eki_n = data.find_parents(id = re_form(r"eki_\d"))
 
-        # TODO: 열차 등급에 따라서, 정차역 기준, 역명을 알아내는 로직 개발
-        direction = "up" if tps["direction"] == "r" else "down"
-        destination = data.parent.find(id = re_form(r"ikisaki\d")).text
-        # print data
-        print(train_type, train_level,end="\t")
-        print(f"{direction}\t{destination}", end="\t")
-        print(from_station_name, end="\t->\t")
-        print(to_station_name, end="\t")
-        # print(station_number_id+"\t:", end="\t")
-        # print(station_space_number_id+"\t:", end="\t")
-        # print(train_number_id+"\t:", end="\t")
-        print(train_rate_time_str)
-# TODO: station_space_number_id에서
-# l인 경우 x-1역명, x역명 (x-1 to x)
-# r인 경우 x역명, x+1역명 (x to x+1)
+    # raw data
+    # get station info
+    station_number_id = eki_n[-1]["id"]
+    station_space_number_id = eki_n[1]["id"]
+    # train rate time
+    train_rate_time_str = data.text
+    # train html id
+    train_number_id = data["id"]
 
-# 1-l의 경우, x+1 역에서 x 역을 향하는 중
-# 0-l의 경우, x 역에서 x-1 역을 향하는 중
-# n-r의 경우, x 역에서 x+1 역을 향하는 중
+    # logical data
+    # train_params : 1-l-1 -> on_station-direction-unknown
+    train_params_string = train_number_id[-5:] # ex) 1-l-1
+    tps = {"on_station": train_params_string[0],
+            "direction": train_params_string[2],
+            "unknown_value": train_params_string[4]}
+
+    # processed data
+    # get train info
+    train_type = get_train_type(data)
+    train_level = get_train_level(train_type)
+    
+    # get station name XXX: 필요없을지도 모름
+    station_id = int(station_number_id.replace("eki_",""))
+    station_name, ___ = find_station_by_id(station_id)
+
+    # set diretion
+    direction = "up" if tps["direction"] == "r" else "down"
+    
+    # get final destination
+    destination = data.parent.find(id = re_form(r"ikisaki\d")).text
+
+    # set from_station_id, to_station_id
+    from_station_name, to_station_name = set_from_to_staion_id(tps)
+
+    # result data
+    train_info_info = {
+        "train_type":train_type, 
+        "train_level":train_level, 
+        "direction":direction, 
+        "destination":destination, 
+        "from_station_name":from_station_name, 
+        "to_station_name":to_station_name,
+        "train_rate_time_str":train_rate_time_str
+    }
+    return train_info_info
+
+def print_train_info(train_info_info):
+    # get data from train info
+    train_type = train_info_info["train_type"]
+    train_level = train_info_info["train_level"]
+    direction = train_info_info["direction"]
+    destination = train_info_info["destination"]
+    from_station_name = train_info_info["from_station_name"]
+    to_station_name = train_info_info["to_station_name"]
+    train_rate_time_str = train_info_info["train_rate_time_str"]
+    
+    # print data
+    print(train_type, train_level,end="\t")
+    print(f"{direction}\t{destination}", end="\t")
+    print(from_station_name, end="\t->\t")
+    print(to_station_name, end="\t")
+    # print(station_number_id+"\t:", end="\t")
+    # print(station_space_number_id+"\t:", end="\t")
+    # print(train_number_id+"\t:", end="\t")
+    print(train_rate_time_str)
+    return  
+
+    
+rate_time_soup_find = soup.find_all("div", id = re_form("okure-jikan-ja", ""))
+train_infos = {}
+for idx, data in enumerate(rate_time_soup_find):
+    if data.text:
+        try:
+            train_info_info = get_train_info(data)
+            train_infos[str(idx)] = train_info_info
+            print_train_info(train_info_info)
+
+        except Exception as e:
+            print(e)
