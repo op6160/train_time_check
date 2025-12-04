@@ -80,7 +80,7 @@ def list_processing(soup):
     targets = soup.find_all('div', id=re.compile(r'^unko_joho_shosai_\d+_naiyo'))
     targets = len(targets)
     if targets is None:
-        raise "error: targets is None"
+        raise ValueError("error: targets is None")
     for counting in range(targets):
         # get info div
         rate_info_div = soup.find("div", id = f"unko_joho_shosai_{counting}_naiyo")
