@@ -1,9 +1,8 @@
-from bs4 import BeautifulSoup
-
 # ======================================================================================= #
 # * * * * * * code for test * * * * * * #
 # mhtml using 
 import email
+from bs4 import BeautifulSoup
 def parse_mhtml_to_soup(mhtml_content):
     """XXX: for tester code"""
     msg = email.message_from_string(mhtml_content)
@@ -29,6 +28,14 @@ with open("tests/dev.test.mhtml", 'r', encoding='utf-8') as f:
     soup = parse_mhtml_to_soup(mhtml_text)
 # * * * * * * = = = = = = = * * * * * * #
 # ======================================================================================= #
+from libs import get_html_content, log
+from bs4 import BeautifulSoup
+import re
+
+# const
+go_up_keyword = "【下り線】"
+go_down_keyword = "【上り線】"
+
 # text processing
 def text_remove_whitespace(text):
     """'Remove whitespace' and 'replace newlines to whitespace' from a string."""
@@ -71,7 +78,6 @@ def list_sort_by_titile(rate_info):
             result[-1] += info
     return result
 
-import re
 def list_processing(soup):
     """
     XXX: hard code
@@ -100,24 +106,6 @@ def list_processing(soup):
         # append to list
         rate_info.append(rate_info_div_soup_text)
     return rate_info
-
-# get rate_info
-rate_info = list_processing(soup)
-rate_info = list_sort_by_titile(rate_info)
-
-# * * * * * * code for test * * * * * * #
-# no parsed data 
-print("*"*20)
-print("rate_info: ")
-for rate in rate_info:
-    print(rate)
-print("*"*20)
-# * * * * * * = = = = = = = * * * * * * #
-####################################################################################################################
-# case
-from libs import log
-go_up_keyword = "【下り線】"
-go_down_keyword = "【上り線】"
 
 def split_rate_info(rate_info):
     """
@@ -156,10 +144,6 @@ def split_rate_info(rate_info):
         log("warn: go_down_info is empty")
         go_down_info.append("")
     return go_down_info, go_up_info
-
-go_down_info, go_up_info = split_rate_info(rate_info)
-go_down_title = go_down_info[0]
-go_up_title = go_up_info[0]
 
 def report_info_check(go_info:list, direction:str):
     """
@@ -214,12 +198,33 @@ def write_state_message(go_info:list, direction:str):
         state_message += message
     return state_message
 
+# BASE_URL = "https://traininfo.jr-central.co.jp/"
+# url = BASE_URL + "zairaisen/status_detail.html?line=10001"
+
+# html = get_html_content(url)
+# soup = BeautifulSoup(html, 'html.parser')
+
+# get rate_info
+rate_info = list_processing(soup)
+rate_info = list_sort_by_titile(rate_info)
+
+go_down_info, go_up_info = split_rate_info(rate_info)
+go_down_title = go_down_info[0]
+go_up_title = go_up_info[0]
+
+# * * * * * * code for test * * * * * * #
+# no parsed data 
+print("*"*20)
+print("rate_info: ")
+for rate in rate_info:
+    print(rate)
+print("*"*20)
 # if state == up
 print("up down info")
 log(write_state_message(go_up_info, "up"))
 # if state == down
 log(write_state_message(go_down_info, "down"))
-
+# * * * * * * = = = = = = = * * * * * * #
 ####################################################################################################################
 # station, train
 " eki_n_senro\n",
