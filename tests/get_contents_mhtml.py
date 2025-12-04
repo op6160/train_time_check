@@ -1,9 +1,11 @@
 from bs4 import BeautifulSoup
 
 # ======================================================================================= #
+# * * * * * * code for test * * * * * * #
+# mhtml using 
 import email
 def parse_mhtml_to_soup(mhtml_content):
-    """tester code"""
+    """XXX: for tester code"""
     msg = email.message_from_string(mhtml_content)
     html_content = None
     # find text/html
@@ -25,8 +27,8 @@ def parse_mhtml_to_soup(mhtml_content):
 with open("tests/dev.test.mhtml", 'r', encoding='utf-8') as f:
     mhtml_text = f.read()
     soup = parse_mhtml_to_soup(mhtml_text)
+# * * * * * * = = = = = = = * * * * * * #
 # ======================================================================================= #
-
 # text processing
 def text_remove_whitespace(text):
     """'Remove whitespace' and 'replace newlines to whitespace' from a string."""
@@ -54,6 +56,7 @@ def text_normalizing_symbol(text):
 # list processing
 def list_sort_by_titile(rate_info):
     """
+    XXX: hard code.
     Sort rate info by title.
 
     Take a list of rate info and sort it by title.
@@ -68,64 +71,96 @@ def list_sort_by_titile(rate_info):
             result[-1] += info
     return result
 
-rate_info = []
-for counting in range(20):
-    # get info div
-    rate_info_div = soup.find("div", id = f"unko_joho_shosai_{counting}_naiyo")
-    if rate_info_div is None:
-        break
-    # div to soup to get text
-    rate_info_div_soup = BeautifulSoup(rate_info_div.prettify(), 'html.parser')
-    # remove </br>
-    for tag in rate_info_div_soup.find_all(["br"]):
-        tag.decompose()
-    # get text
-    rate_info_div_soup_text = rate_info_div_soup.find("p").text
-    # normalize the text
-    rate_info_div_soup_text = text_remove_whitespace(rate_info_div_soup_text)
-    rate_info_div_soup_text = text_replace_newlines(rate_info_div_soup_text)
-    rate_info_div_soup_text = text_normalizing_symbol(rate_info_div_soup_text)
-    # append to list
-    rate_info.append(rate_info_div_soup_text)
+import re
+def list_processing(soup):
+    """
+    XXX: hard code
+    """
+    rate_info = []
+    targets = soup.find_all('div', id=re.compile(r'^unko_joho_shosai_\d+_naiyo'))
+    targets = len(targets)
+    if targets is None:
+        raise "error: targets is None"
+    for counting in range(targets):
+        # get info div
+        rate_info_div = soup.find("div", id = f"unko_joho_shosai_{counting}_naiyo")
+        if rate_info_div is None:
+            break
+        # div to soup to get text
+        rate_info_div_soup = BeautifulSoup(rate_info_div.prettify(), 'html.parser')
+        # remove </br>
+        for tag in rate_info_div_soup.find_all(["br"]):
+            tag.decompose()
+        # get text
+        rate_info_div_soup_text = rate_info_div_soup.find("p").text
+        # normalize the text
+        rate_info_div_soup_text = text_remove_whitespace(rate_info_div_soup_text)
+        rate_info_div_soup_text = text_replace_newlines(rate_info_div_soup_text)
+        rate_info_div_soup_text = text_normalizing_symbol(rate_info_div_soup_text)
+        # append to list
+        rate_info.append(rate_info_div_soup_text)
+    return rate_info
 
-# sort
+# get rate_info
+rate_info = list_processing(soup)
 rate_info = list_sort_by_titile(rate_info)
 
-# print(rate_info)
+# * * * * * * code for test * * * * * * #
+# no parsed data 
 print("*"*20)
 print("rate_info: ")
 for rate in rate_info:
     print(rate)
-# print(rate_info[0]) # .find("p").text
 print("*"*20)
+# * * * * * * = = = = = = = * * * * * * #
 ####################################################################################################################
 # case
-go_down_info = [] # morning
-go_up_info = [] # night
-
+from libs import log
 go_up_keyword = "【下り線】"
 go_down_keyword = "【上り線】"
 
-for rate in rate_info:
-    if go_up_keyword in rate:
-        go_up_info.append(rate)
+def split_rate_info(rate_info):
+    """
+    XXX: hard code
+    Split rate info by keyword.
+    """
+    # init
+    go_down_info = [] # morning
+    go_up_info = [] # night
+
+    # split
+    for rate in rate_info:
+        if go_up_keyword in rate:
+            go_up_info.append(rate)
+
+            if go_down_keyword in rate:
+                if rate.find(go_up_keyword) > rate.find(go_down_keyword):
+                    go_up_info[-1] = rate[rate.find(go_up_keyword):].strip()
+                else:
+                    go_up_info[-1] = rate[rate.find(go_up_keyword):rate.find(go_down_keyword)].strip()
 
         if go_down_keyword in rate:
-            if rate.find(go_up_keyword) > rate.find(go_down_keyword):
-                go_up_info[-1] = rate[rate.find(go_up_keyword):].strip()
-            else:
-                go_up_info[-1] = rate[rate.find(go_up_keyword):rate.find(go_down_keyword)].strip()
+            go_down_info.append(rate)
 
-    if go_down_keyword in rate:
-        go_down_info.append(rate)
+            if go_up_keyword in rate:
+                if rate.find(go_up_keyword) < rate.find(go_down_keyword):
+                    go_down_info[-1] = rate[rate.find(go_down_keyword):].strip()
+                else:
+                    go_down_info[-1] = rate[rate.find(go_down_keyword):rate.find(go_up_keyword)].strip()
+    
+    # add empty string to avoid go_up_title and go_down_title allocating error
+    if len(go_up_info) == 0:
+        log("warn: go_up_info is empty")
+        go_up_info.append("")
+    if len(go_down_info) == 0:
+        log("warn: go_down_info is empty")
+        go_down_info.append("")
+    return go_down_info, go_up_info
 
-        if go_up_keyword in rate:
-            if rate.find(go_up_keyword) < rate.find(go_down_keyword):
-                go_down_info[-1] = rate[rate.find(go_down_keyword):].strip()
-            else:
-                go_down_info[-1] = rate[rate.find(go_down_keyword):rate.find(go_up_keyword)].strip()
+go_down_info, go_up_info = split_rate_info(rate_info)
+go_down_title = go_down_info[0]
+go_up_title = go_up_info[0]
 
-from libs import log
 def report_info_check(go_info:list, direction:str):
     """
     Check if there is keyword in the given info list.
@@ -146,10 +181,13 @@ def report_info_check(go_info:list, direction:str):
 
 def write_state_message(go_info:list, direction:str):
     """
-    hard code. format:
+    XXX: hard code. format:
     【下り線】 ~~
     新快速～～行き（～～〇〇時〇〇分）快速～～行き（～～☓☓時☓☓分）
     """
+    def it_is_not_taketoyo(message):
+        """usecase"""
+        return None if "武豊行き" in message else message
     # init
     state_message = ""
     # report check
@@ -162,6 +200,13 @@ def write_state_message(go_info:list, direction:str):
             state_message = message+"\n"
             continue
         message = message.replace(keyword, "").strip()
+
+        # filtering taketoyo line
+        message = it_is_not_taketoyo(message)
+        if not message:
+            continue
+        
+        # one line one info formatting
         if message.count(")") > 1:
             message = message.replace(")", ")\n")
         else:
@@ -170,6 +215,7 @@ def write_state_message(go_info:list, direction:str):
     return state_message
 
 # if state == up
+print("up down info")
 log(write_state_message(go_up_info, "up"))
 # if state == down
 log(write_state_message(go_down_info, "down"))
