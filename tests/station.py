@@ -28,7 +28,7 @@ stationID = {
     "名古屋":{"id":26, "name":"nagoya","level":4},
     "枇杷島":{"id":27, "name":"biwajima","level":0},
     "清洲":{"id":28, "name":"kiyosu","level":0},
-    "稲沢":{"id":29, "name":"inazawa","level":-2},
+    "稲沢":{"id":29, "name":"inazawa","level":2},
     "尾張一宮":{"id":30, "name":"owariichinomiya","level":4},
     "木曽川":{"id":31, "name":"kisogawa","level":0},
     "岐阜":{"id":32, "name":"gifu","level":4},
