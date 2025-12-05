@@ -251,7 +251,6 @@ def find_station_by_id(id:int)->tuple:
         if value["id"] == id:
             return name, value
 
-
 def get_train_info(data):
     """
     Get train info from the given html source.
