@@ -323,7 +323,7 @@ def get_train_info(data):
     # if train_type != "normal":
     before_station_name = get_before_station(from_station_id, train_level, direction)
 
-    # result data
+    # result data packing
     train_info_info = {
         "train_type":train_type, 
         "train_level":train_level, 
@@ -339,32 +339,75 @@ def get_train_info(data):
 def soup_find_all_div_by_id(id):
     return soup.find_all("div", id = id)
 
+def notice_data_packing(rate_info):
+    go_down_info, go_up_info = split_rate_info(rate_info)
 
-BASE_URL = "https://traininfo.jr-central.co.jp/"
-url = BASE_URL + "zairaisen/status_detail.html?line=10001"
+    go_down_title = go_down_info[0]
+    go_up_title = go_up_info[0]
+    go_down_info = go_down_info[1:]
+    go_up_info = go_up_info[1:]
 
-html = get_html_content(url)
-soup = BeautifulSoup(html, 'html.parser')
+    notice_data = {
+    "go_down_title": go_down_title,
+    "go_down_info": go_down_info,
+    "go_up_title": go_up_title,
+    "go_up_info": go_up_info,
+    "_rate_info": rate_info
+    }
+    return notice_data
 
-# get notice
-rate_info = list_processing(soup)
-rate_info = list_sort_by_titile(rate_info)
+# main function
+def get_train_rate_and_time_info():
+    """
+    Get train rate and time information from the given html source.
 
-go_down_info, go_up_info = split_rate_info(rate_info)
-go_down_title = go_down_info[0]
-go_up_title = go_up_info[0]
+    Returns:
+        notice_data ( dict ): notice data
+            {
+                "go_down_title":str, 
+                "go_down_info":list, 
+                "go_up_title":str, 
+                "go_up_info":list, 
+                "_rate_info":list
+            }
+        train_data ( dict ): train data
+            {
+                "idx":dict, 
+                    {
+                        "train_type":str, 
+                        "train_level":int, 
+                        "direction":str, 
+                        "destination":str, 
+                        "from_station_name":str, 
+                        "to_station_name":str,
+                        "train_rate_time_str":str,
+                        "before_station_name":str
+                    }
+            }
+    """
+    BASE_URL = "https://traininfo.jr-central.co.jp/"
+    url = BASE_URL + "zairaisen/status_detail.html?line=10001"
 
-print(rate_info)
-print(go_down_info)
-print(go_up_info)
+    html = get_html_content(url)
+    soup = BeautifulSoup(html, 'html.parser')
 
-# get rate train times
-rate_time_soup_find = soup_find_all_div_by_id(re_form("okure-jikan-ja", ""))
-train_infos = {}
+    # get notice
+    rate_info = list_processing(soup)
+    rate_info = list_sort_by_titile(rate_info)
+    notice_data = notice_data_packing(rate_info)
 
-for idx, data in enumerate(rate_time_soup_find):
-    if data.text:
-        train_info_info = get_train_info(data)
-        train_infos[str(idx)] = train_info_info
+    # get rate train times
+    rate_time_soup_find = soup_find_all_div_by_id(re_form("okure-jikan-ja", ""))
+    train_data = {}
 
-print(train_infos)
+    for idx, data in enumerate(rate_time_soup_find):
+        if data.text:
+            train_info_info = get_train_info(data)
+            train_data[str(idx)] = train_info_info
+    return notice_data, train_data
+    
+
+if __name__ == "__main__":
+    notice_data, train_data = get_train_rate_and_time_info()
+    print(notice_data)
+    print(train_data)
