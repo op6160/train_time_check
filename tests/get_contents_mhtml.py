@@ -243,9 +243,21 @@ if go_up_title:
 from station import stationID as stations
 
 def find_station_by_id(id):
-    for name, values in stations.items():
-        if values["id"] == id:
-            return name, values
+    for name, value in stations.items():
+        if value["id"] == id:
+            return name, value
+
+def get_before_station(current_from_id, train_level, direction):
+    # XXX: 데이터 구조를 잘못 설계해서, idx기반으로 구현했음
+    values = list(stations.values())
+    if direction == "up":
+        if values[current_from_id]["level"] < train_level: #역의 레벨이 기차레벨보다 낮을 때
+            return get_before_station(current_from_id - 1, train_level, direction)
+    elif direction == "down":
+        if values[current_from_id]["level"] < train_level:
+            return get_before_station(current_from_id + 1, train_level, direction)
+    keys = list(stations.keys())
+    return keys[current_from_id]
 
 def get_train_info(data):
     def get_train_type(data):
@@ -272,31 +284,25 @@ def get_train_info(data):
             return "unknown"
 
     def set_from_to_staion_id(tps):
-        # if train is normal
-        if tps["on_station"] == "1" and tps["direction"] == "l":
+        down_on_station_case = tps["on_station"] == "1" and tps["direction"] == "l"
+        down_not_on_station_case = tps["on_station"] == "0" and tps["direction"] == "l"
+        up_case = tps["direction"] == "r"
+
+        if down_on_station_case:
             from_station_id = station_id + 1
             to_station_id = station_id
-            from_station_name, ___ = find_station_by_id(from_station_id)
-            to_station_name, ___ = find_station_by_id(to_station_id)
-        elif tps["on_station"] == "0" and tps["direction"] == "l":
+        elif down_not_on_station_case:
             from_station_id = station_id
             to_station_id = station_id - 1
-            from_station_name, ___ = find_station_by_id(from_station_id)
-            to_station_name, ___ = find_station_by_id(to_station_id)
-        elif tps["direction"] == "r":
+        elif up_case:
             from_station_id = station_id
             to_station_id = station_id + 1
-            from_station_name, ___ = find_station_by_id(from_station_id)
-            to_station_name, ___ = find_station_by_id(to_station_id)
         else:
             raise Exception("Invalid train params")
-        # if train is kaisoku
-        # if train is kukankaisoku
-        # if train is shinkaisoku
-        # if train in tokubetsukaisoku
-        # else(unknown)
-        # TODO: 열차 등급에 따라서, 정차역 기준, 역명을 알아내는 로직
-        return from_station_name, to_station_name    
+        from_station_name, ___ = find_station_by_id(from_station_id)
+        to_station_name, ___ = find_station_by_id(to_station_id)
+
+        return from_station_name, to_station_name, from_station_id    
     
     # find id "eki_n" div
     eki_n = data.find_parents(id = re_form(r"eki_\d"))
@@ -322,7 +328,7 @@ def get_train_info(data):
     train_type = get_train_type(data)
     train_level = get_train_level(train_type)
     
-    # get station name XXX: 필요없을지도 모름
+    # get station name
     station_id = int(station_number_id.replace("eki_",""))
     station_name, ___ = find_station_by_id(station_id)
 
@@ -333,7 +339,12 @@ def get_train_info(data):
     destination = data.parent.find(id = re_form(r"ikisaki\d")).text
 
     # set from_station_id, to_station_id
-    from_station_name, to_station_name = set_from_to_staion_id(tps)
+    from_station_name, to_station_name, from_station_id = set_from_to_staion_id(tps)
+
+    # get before station name
+    before_station_name = None
+    # if train_type != "normal":
+    before_station_name = get_before_station(from_station_id, train_level, direction)
 
     # result data
     train_info_info = {
@@ -343,7 +354,8 @@ def get_train_info(data):
         "destination":destination, 
         "from_station_name":from_station_name, 
         "to_station_name":to_station_name,
-        "train_rate_time_str":train_rate_time_str
+        "train_rate_time_str":train_rate_time_str,
+        "before_station_name":before_station_name
     }
     return train_info_info
 
@@ -356,7 +368,7 @@ def print_train_info(train_info_info):
     from_station_name = train_info_info["from_station_name"]
     to_station_name = train_info_info["to_station_name"]
     train_rate_time_str = train_info_info["train_rate_time_str"]
-    
+    before_station_name = train_info_info["before_station_name"]
     # print data
     print(train_type, train_level,end="\t")
     print(f"{direction}\t{destination}", end="\t")
@@ -365,7 +377,8 @@ def print_train_info(train_info_info):
     # print(station_number_id+"\t:", end="\t")
     # print(station_space_number_id+"\t:", end="\t")
     # print(train_number_id+"\t:", end="\t")
-    print(train_rate_time_str)
+    print(train_rate_time_str, end="\t")
+    print(before_station_name)
     return  
 
     
