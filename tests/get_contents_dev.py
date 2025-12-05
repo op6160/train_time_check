@@ -336,7 +336,7 @@ def get_train_info(data):
     }
     return train_info_info
 
-def soup_find_all_div_by_id(id):
+def soup_find_all_div_by_id(soup, id):
     return soup.find_all("div", id = id)
 
 def notice_data_packing(rate_info):
@@ -397,7 +397,7 @@ def get_train_rate_and_time_info():
     notice_data = notice_data_packing(rate_info)
 
     # get rate train times
-    rate_time_soup_find = soup_find_all_div_by_id(re_form("okure-jikan-ja", ""))
+    rate_time_soup_find = soup_find_all_div_by_id(soup, re_form("okure-jikan-ja", ""))
     train_data = {}
 
     for idx, data in enumerate(rate_time_soup_find):
