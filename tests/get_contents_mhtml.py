@@ -242,26 +242,42 @@ if go_up_title:
 
 from station import stationID as stations
 
-def find_station_by_id(id):
+def find_station_by_id(id:int)->tuple:
+    """
+    Find a station name and station's info by its id.
+    Return: (station_name:str, station_info:dict)
+    """
     for name, value in stations.items():
         if value["id"] == id:
             return name, value
 
-def get_before_station(current_from_id, train_level, direction):
-    # XXX: 데이터 구조를 잘못 설계해서, idx기반으로 구현했음
-    values = list(stations.values())
-    if direction == "up":
-        if values[current_from_id]["level"] < train_level: #역의 레벨이 기차레벨보다 낮을 때
-            return get_before_station(current_from_id - 1, train_level, direction)
-    elif direction == "down":
-        if values[current_from_id]["level"] < train_level:
-            return get_before_station(current_from_id + 1, train_level, direction)
-    keys = list(stations.keys())
-    return keys[current_from_id]
 
 def get_train_info(data):
+    """
+    Get train info from the given html source.
+
+    Args:
+        data (BeautifulSoup object ): html source
+
+    Returns:
+        train_info_info ( dict ): train info
+            {
+                "train_type":str, 
+                "train_level":int, 
+                "direction":str, 
+                "destination":str, 
+                "from_station_name":str, 
+                "to_station_name":str,
+                "train_rate_time_str":str,
+                "before_station_name":str
+            }
+    """
     def get_train_type(data):
-    # train_type_img = data.parent.find("img")["src"][:-4].split("/")[-1].split("_")[-1]
+        """
+        Get the train type from the html source(img file name).
+
+        """
+        # train_type_img = data.parent.find("img")["src"][:-4].split("/")[-1].split("_")[-1]
         train_type_img = data.parent.find("img")
         img_src = train_type_img["src"]
         src_filename = img_src[:-4]
@@ -269,7 +285,10 @@ def get_train_info(data):
         train_type = src_filename_nopath.split("_")[-1]
         return train_type
 
-    def get_train_level(train_type):
+    def get_train_level(train_type:str)->int:
+        """
+        Get the train level from the given train type.
+        """
         if train_type == "normal":
             return 0
         elif train_type == "kukankaisoku":
@@ -281,9 +300,22 @@ def get_train_info(data):
         elif train_type == "tokubetsukaisoku":
             return 4
         else:
-            return "unknown"
+            log(f"warning: unknown train type. {train_type}.")
+            log(f" the logic will be worked as normal train type.")
+            return 0
 
     def set_from_to_staion_id(tps):
+        """
+        Set from_station_id and to_station_id based on the given train params.
+
+        Args:
+            tps ( dict ): train params
+
+        Returns:
+            from_station_name ( str ): from station name
+            to_station_name ( str ): to station name
+            from_station_id ( int ): from station id to use in get_before_station
+        """
         down_on_station_case = tps["on_station"] == "1" and tps["direction"] == "l"
         down_not_on_station_case = tps["on_station"] == "0" and tps["direction"] == "l"
         up_case = tps["direction"] == "r"
@@ -302,8 +334,23 @@ def get_train_info(data):
         from_station_name, ___ = find_station_by_id(from_station_id)
         to_station_name, ___ = find_station_by_id(to_station_id)
 
-        return from_station_name, to_station_name, from_station_id    
-    
+        return from_station_name, to_station_name, from_station_id  
+
+    def get_before_station(current_from_id, train_level, direction):
+        """
+        Find a before stop station name by train,station level.
+        """
+        # XXX: 데이터 구조를 잘못 설계해서, idx기반으로 구현했음
+        values = list(stations.values())
+        if direction == "up":
+            if values[current_from_id]["level"] < train_level: #역의 레벨이 기차레벨보다 낮을 때
+                return get_before_station(current_from_id - 1, train_level, direction)
+        elif direction == "down":
+            if values[current_from_id]["level"] < train_level:
+                return get_before_station(current_from_id + 1, train_level, direction)
+        keys = list(stations.keys())
+        return keys[current_from_id]
+
     # find id "eki_n" div
     eki_n = data.find_parents(id = re_form(r"eki_\d"))
 
@@ -381,9 +428,13 @@ def print_train_info(train_info_info):
     print(before_station_name)
     return  
 
-    
-rate_time_soup_find = soup.find_all("div", id = re_form("okure-jikan-ja", ""))
+def soup_find_all_div_by_id(id):
+    return soup.find_all("div", id = id)
+
+rate_time_soup_find = soup_find_all_div_by_id(re_form("okure-jikan-ja", ""))
+
 train_infos = {}
+
 for idx, data in enumerate(rate_time_soup_find):
     if data.text:
         try:
