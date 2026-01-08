@@ -213,61 +213,6 @@ def get_train_info(data):
     }
     return train_info_info
 
-# developing function
-def write_state_message(go_info:list, direction:str):
-    """
-    XXX: hard code. format:
-    【下り線】 ~~
-    新快速～～行き（～～〇〇時〇〇分）快速～～行き（～～☓☓時☓☓分）
-    """
-    def report_info_check(go_info:list, direction:str):
-        """
-        Check if there is keyword in the given info list.
-        If there is, send email with data.
-        """
-        report_flag = False
-        # set keywords to check (important: it must be opposite of direction and keyword)
-        keyword = go_down_keyword if direction == "up" else go_up_keyword
-        for info in go_info:
-            if keyword in info:
-                log(f"error: {keyword} detected in {direction} info: {info}")
-                report_flag = True
-        if report_flag:
-            # Do: send email with data
-            # TODO: implement email sending
-            pass
-        return
-
-    def it_is_not_taketoyo(message):
-        """usecase"""
-        return None if "武豊行き" in message else message
-
-    # init
-    state_message = ""
-    # report check
-    report_info_check(go_info, direction)
-    # keyword set
-    keyword = go_up_keyword if direction == "up" else go_down_keyword
-    for idx, info in enumerate(go_info):
-        message = text_remove_whitespace(info)
-        if idx == 0:
-            state_message = message+"\n"
-            continue
-        message = message.replace(keyword, "").strip()
-
-        # filtering taketoyo line
-        message = it_is_not_taketoyo(message)
-        if not message:
-            continue
-        
-        # one line one info formatting
-        if message.count(")") > 1:
-            message = message.replace(")", ")\n")
-        else:
-            message += "\n"
-        state_message += message
-    return state_message
-
 # main function
 def get_train_rate_and_time_info():
     """
@@ -420,30 +365,30 @@ def get_train_rate_and_time_info():
     soup = BeautifulSoup(html, 'html.parser')
 
     # test html
-    # import email
-    # FILE2 = "tests/mhtml/dev.1205.mhtml"
-    # with open(FILE2, 'r', encoding='utf-8') as f:
-    #     mhtml_text = f.read()
-    # def parse_mhtml_to_soup(mhtml_content):
-    #     """XXX: for tester code"""
-    #     msg = email.message_from_string(mhtml_content)
-    #     html_content = None
-    #     # find text/html
-    #     for part in msg.walk():
-    #         if part.get_content_type() == 'text/html':
-    #             # decode
-    #             html_content = part.get_payload(decode=True)
-    #             charset = part.get_content_charset()
-    #             if charset:
-    #                 html_content = html_content.decode(charset, errors='replace')
-    #             break
+    import email
+    FILE2 = "tests/mhtml/dev.1205.mhtml"
+    with open(FILE2, 'r', encoding='utf-8') as f:
+        mhtml_text = f.read()
+    def parse_mhtml_to_soup(mhtml_content):
+        """XXX: for tester code"""
+        msg = email.message_from_string(mhtml_content)
+        html_content = None
+        # find text/html
+        for part in msg.walk():
+            if part.get_content_type() == 'text/html':
+                # decode
+                html_content = part.get_payload(decode=True)
+                charset = part.get_content_charset()
+                if charset:
+                    html_content = html_content.decode(charset, errors='replace')
+                break
         
-    #     if html_content:
-    #         soup = BeautifulSoup(html_content, 'html.parser')
-    #         return soup
-    #     else:
-    #         return None
-    # soup = parse_mhtml_to_soup(mhtml_text)
+        if html_content:
+            soup = BeautifulSoup(html_content, 'html.parser')
+            return soup
+        else:
+            return None
+    soup = parse_mhtml_to_soup(mhtml_text)
 
     # get notice
     train_state_data = get_driving_state(soup)
@@ -506,12 +451,15 @@ def write_state_message(language, train_data, notice_data, direction=None):
     train_message = []
 
     if direction in ("up", "down"):
-        direction_title = f"go_{direction}_title"
-        direction_info = f"go_{direction}_info"
-        notice_message += f"{notice_data[direction_title]}" if notice_data[direction_title] else ""
-        notice_message += "\n" if notice_data[direction_title] and notice_data[direction_info] else ""
-        notice_message += f"{notice_data[direction_info]}" if notice_data[direction_info] else ""
-        if notice_message == "* notice:": notice_message = ""
+        direction_title_key = f"go_{direction}_title"
+        direction_info_key = f"go_{direction}_info"
+        direction_info = notice_data[direction_info_key]
+        direction_title = notice_data[direction_title_key]
+
+        notice_message += direction_title if direction_title else ""
+        notice_message += "\n" if direction_title and direction_info else ""
+        notice_message += direction_info if direction_info else ""
+
         for info in train_data.values():
             if info["direction"] == replace_map[direction]:
                 train_message.append(gen_message(info, message_form))
@@ -520,7 +468,13 @@ def write_state_message(language, train_data, notice_data, direction=None):
         for msg in notice_data.values():
             notice_message += f"{msg}" if msg else ""
         for info in train_data.values():
-            train_message.append(gen_message(info, message_form))
+            if info["direction"] == replace_map["up"]:
+                train_message.append(gen_message(info, message_form))
+        for info in train_data.values():
+            if info["direction"] == replace_map["down"]:
+                train_message.append(gen_message(info, message_form))
+        # for info in train_data.values():
+        #     train_message.append(gen_message(info, message_form))
 
     if notice_message == "* notice:": notice_message = ""
     return notice_message, train_message
@@ -533,14 +487,14 @@ def print_message(notice_message, train_message):
         print(message)
     print("*" * 20)
 
-def main():
+def main(language="ko", use_case=None):
     state_train, notice_data, train_data = get_train_rate_and_time_info()
     if state_train:
         # fine state.
         print(notice_data)
         log("All trains are fine.")
     else:
-        notice_message, train_message = write_state_message("ko", train_data, notice_data, "down")
+        notice_message, train_message = write_state_message(language, train_data, notice_data, use_case)
         print_message(notice_message, train_message)
 
 if __name__ == "__main__":

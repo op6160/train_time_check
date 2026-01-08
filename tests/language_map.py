@@ -1,13 +1,7 @@
 import json
 import re
 
-def dict_replace(dictionary, replace_map):
-    temp_str = json.dumps(dictionary, ensure_ascii=False)
-    pattern = re.compile("|".join(map(re.escape, replace_map.keys())))
-    temp_str = pattern.sub(lambda x: replace_map[x.group(0)], temp_str)
-    return json.loads(temp_str)
-
-ko_replace_map = {
+KO_REPLACE_MAP = {
     # 명사변환
     "normal": "보통",
     "kukankaisoku": "구간쾌속",
@@ -61,7 +55,7 @@ ko_replace_map = {
     "米原":"마이바라"
 }
 
-ja_replace_map = {
+JA_REPLACE_MAP = {
     "normal": "普通",
     "kukankaisoku": "区間快速",
     "kaisoku": "快速",
@@ -71,7 +65,7 @@ ja_replace_map = {
     "down": "下行",
 }
 
-en_replace_map = {
+EN_REPLACE_MAP = {
     "kukankaisoku": "limited express",
     "kaisoku": "express",
     "shinkaisoku": "new express",
@@ -122,35 +116,53 @@ en_replace_map = {
     "米原":"Maibara"
 }
 
+def dict_replace(dictionary:dict, replace_map:dict)->dict:
+    """
+    Replace keys in dictionary with values in replace_map.
+
+    :param dictionary: dict
+    :param replace_map: dict
+    :return: dict
+    """
+    temp_str = json.dumps(dictionary, ensure_ascii=False)
+    pattern = re.compile("|".join(map(re.escape, replace_map.keys())))
+    temp_str = pattern.sub(lambda x: replace_map[x.group(0)], temp_str)
+    return json.loads(temp_str)
 def ja_form():
-    message_form = {
-        "train_type":"列車",
-        "destination":"行き",
-        "from_station":"駅から出発し、",
-        "before_station":"駅を通過、",
-        "to_station":"へ移動中。",
-        "rate_time":"分遅れ"
-        }
-    return message_form, ja_replace_map
+    """
+    Set message form for Japanese.
+    """
+    return {
+        "train_type": "列車",
+        "destination": "行き",
+        "from_station": "駅から出発し、",
+        "before_station": "駅を通過、",
+        "to_station": "へ移動中。",
+        "rate_time": "分遅れ"
+    }, JA_REPLACE_MAP
 
 def ko_form():
-    message_form = {
-        "train_type":"열차",
-        "destination":"행",
-        "from_station":"역 출발, ",
-        "before_station":"역 통과, ",
-        "to_station":"역 이동중",
-        "rate_time":"분 지연"
-        }
-    return message_form, ko_replace_map
+    """
+    Set message form for Korean.
+    """
+    return {
+        "train_type": "열차",
+        "destination": "행",
+        "from_station": "역 출발, ",
+        "before_station": "역 통과, ",
+        "to_station": "역 이동중",
+        "rate_time": "분 지연"
+    }, KO_REPLACE_MAP
 
 def en_form():
-    message_form = {
-        "train_type":"train",
-        "destination":" going",
-        "from_station":" from, ",
-        "before_station":" via, ",
-        "to_station":" to",
-        "rate_time":" mins late"
-    }
-    return message_form, en_replace_map
+    """
+    Set message form for English.
+    """
+    return {
+        "train_type": "train",
+        "destination": " going",
+        "from_station": " from, ",
+        "before_station": " via, ",
+        "to_station": " to",
+        "rate_time": " mins late"
+    }, EN_REPLACE_MAP
