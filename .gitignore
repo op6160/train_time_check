@@ -2,3 +2,4 @@ div/
 dev.*
 .env
 tests/mhtml/
+*.code-workspace
