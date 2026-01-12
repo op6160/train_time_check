@@ -11,6 +11,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(current_dir)
 src_path = os.path.join(root_dir, "src")
 sys.path.append(src_path)
+sys.path.append(root_dir)
 
 from api import get_train_status_range_api
 
