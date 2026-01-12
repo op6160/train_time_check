@@ -38,7 +38,7 @@ def text_normalizing_symbol(text):
     return text
 
 def re_form(startswith = "", endswith = ""):
-    return re.compile(r'^'+startswith+r'*'+endswith)
+    return re.compile(r'^'+startswith+r'.*'+endswith)
 
 
 # data processing utility 
@@ -188,7 +188,9 @@ def get_train_info(data):
     direction = "up" if tps["direction"] == "r" else "down"
     
     # get final destination
-    destination = data.parent.find(id = re_form(r"ikisaki\d")).text
+    # find destination by class name "ressha_ikisaki"
+    destination_tag = eki_n[0].find(class_="ressha_ikisaki")
+    destination = destination_tag.text if destination_tag else "Unknown"
 
     # set from_station_id, to_station_id
     from_station_name, to_station_name, from_station_id = set_from_to_staion_id(tps)
@@ -419,7 +421,6 @@ def write_state_message(language, train_data, notice_data, direction=None):
 
     message_form, replace_map = set_language_form(language)
     from language_map import dict_replace
-    train_data = dict_replace(train_data, replace_map)
 
     notice_message = "* notice:"
     train_message = []
@@ -432,18 +433,21 @@ def write_state_message(language, train_data, notice_data, direction=None):
         notice_message += f"{notice_data[direction_info]}" if notice_data[direction_info] else ""
 
         for info in train_data.values():
-            if info["direction"] == replace_map[direction]:
-                train_message.append(gen_message(info, message_form))
+            if info["direction"] == direction:
+                display_info = dict_replace(info, replace_map)
+                train_message.append(gen_message(display_info, message_form))
 
     else:
         for msg in notice_data.values():
             notice_message += f"{msg}" if msg else ""
         for info in train_data.values():
-            if info["direction"] == replace_map["up"]:
-                train_message.append(gen_message(info, message_form))
+            if info["direction"] == "up":
+                display_info = dict_replace(info, replace_map)
+                train_message.append(gen_message(display_info, message_form))
         for info in train_data.values():
-            if info["direction"] == replace_map["down"]:
-                train_message.append(gen_message(info, message_form))
+            if info["direction"] == "down":
+                display_info = dict_replace(info, replace_map)
+                train_message.append(gen_message(display_info, message_form))
 
     if notice_message == "* notice:": notice_message = ""
     return notice_message, train_message
