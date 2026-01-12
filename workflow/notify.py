@@ -81,10 +81,15 @@ def main():
         result = check_train_status(target_station, direction, range_n)
 
         if result["status"] == "delay":
-            logger.info("Delay detected! Sending notification...")
-            
             notice_msg = result.get("notice_message", "")
-            train_msgs = "\n".join(result.get("train_messages", []))
+            train_msgs_list = result.get("train_messages", [])
+            train_msgs = "\n".join(train_msgs_list)
+
+            if not notice_msg and not train_msgs:
+                logger.info("Delay status detected, but no relevant trains or notices found in range. Skipping notification.")
+                return
+
+            logger.info("Delay detected! Sending notification...")
             full_message = f"❗열차 지연 발생\n\n[운행 정보]\n{notice_msg}\n\n[지연 열차]\n{train_msgs}"
             
             send_webhook(webhook_url, full_message, "열차 지연" , result["raw_data"])
