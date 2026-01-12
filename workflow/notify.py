@@ -85,7 +85,7 @@ def main():
             train_msgs_list = result.get("train_messages", [])
             train_msgs = "\n".join(train_msgs_list)
 
-            if not notice_msg and not train_msgs:
+            if not train_msgs:
                 logger.info("Delay status detected, but no relevant trains or notices found in range. Skipping notification.")
                 return
 
