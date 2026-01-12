@@ -32,7 +32,8 @@ on:
 jobs:
   check-delay:
     permissions:
-      contents: write  # 로그 작성용 쓰기권한
+      contents: read
+      issues: write    # 이슈 생성 권한
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -60,14 +61,16 @@ jobs:
           ENABLE_ERROR_NOTIFICATION: "true" # 에러 발생시 알림 여부
         run: python workflow/notify.py
       
-      - name: Push Error Log
-        # notify.py 실행이 실패했을 때 로그 파일을 저장
+      - name: Create Issue on Failure
+        # notify.py 실행이 실패했을 때 이슈 생성
         if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          TZ: 'Asia/Tokyo'
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add workflow/logs/
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Log: Code Error detected." && git push)
+          chmod +x workflow/report_failure.sh
+          ./workflow/report_failure.sh
 
       - name: Check Evening Commute (Up Line)
         # 스케줄이 '09:30'이거나, 수동 실행 시 방향이 'up'일 때 실행
@@ -80,15 +83,16 @@ jobs:
           ENABLE_ERROR_NOTIFICATION: "true"
         run: python workflow/notify.py
 
-      - name: Push Error Log (Evening)
-        # notify.py 실행이 실패했을 때 로그 파일을 저장
+      - name: Create Issue on Failure (Evening)
+        # notify.py 실행이 실패했을 때 이슈 생성
         if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          TZ: 'Asia/Tokyo'
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
-          git add workflow/logs/
-          # 변경사항이 있을 때만 커밋
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Log: Code Error detected." && git push)
+          chmod +x workflow/report_failure.sh
+          ./workflow/report_failure.sh
 
 
       - name: Test Workflow on Push
