@@ -87,3 +87,15 @@ jobs:
           git add workflow/logs/
           # 변경사항이 있을 때만 커밋
           git diff --quiet && git diff --staged --quiet || (git commit -m "Log: Code Error detected." && git push)
+
+
+      - name: Test Workflow on Push
+        # dev 테스트 실행
+        if: github.event_name == 'push'
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          TARGET_STATION: "刈谷"
+          DIRECTION: "down"
+          RANGE_N: "6"
+          ENABLE_ERROR_NOTIFICATION: "true" # 에러 발생시 알림 여부
+        run: python workflow/notify.py
