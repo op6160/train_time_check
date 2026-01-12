@@ -52,7 +52,8 @@ jobs:
 
       - name: Check Morning Commute (Down Line)
         # 스케줄이 '22:30'이거나, 수동 실행 시 방향이 'down'일 때 실행
-        if: github.event.schedule == '30 22 * * 0-4' || github.event.schedule == '00 23 * * 0-4' || (github.event_name == 'workflow_dispatch' && github.event.inputs.direction == 'down')
+        if: (github.event_name == 'schedule' && (github.event.schedule == '30 22 * * 0-4' || github.event.schedule == '00 23 * * 0-4')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.direction == 'down')
+        # if: github.event.schedule == '30 22 * * 0-4' || github.event.schedule == '00 23 * * 0-4' || (github.event_name == 'workflow_dispatch' && github.event.inputs.direction == 'down')
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
           TARGET_STATION: "刈谷"
@@ -74,7 +75,8 @@ jobs:
 
       - name: Check Evening Commute (Up Line)
         # 스케줄이 '09:30'이거나, 수동 실행 시 방향이 'up'일 때 실행
-        if: github.event.schedule == '00 08 * * 1-5' || github.event.schedule == '30 08 * * 1-5' || (github.event_name == 'workflow_dispatch' && github.event.inputs.direction == 'up')
+        if: (github.event_name == 'schedule' && (github.event.schedule == '00 08 * * 1-5' || github.event.schedule == '30 08 * * 1-5')) || (github.event_name == 'workflow_dispatch' && github.event.inputs.direction == 'up')
+        # if: github.event.schedule == '00 08 * * 1-5' || github.event.schedule == '30 08 * * 1-5' || (github.event_name == 'workflow_dispatch' && github.event.inputs.direction == 'up')
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
           TARGET_STATION: "刈谷"
