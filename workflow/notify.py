@@ -90,7 +90,7 @@ def main():
                 return
 
             logger.info("Delay detected! Sending notification...")
-            full_message = f"❗열차 지연 발생\n\n[운행 정보]\n{notice_msg}\n\n[지연 열차]\n{train_msgs}"
+            full_message = f"❗열차 지연 발생\n[지연 열차 목록]\n{train_msgs}\n\n[운행 정보]\n{notice_msg}"
             
             send_webhook(webhook_url, full_message, "열차 지연" , result["raw_data"])
         else:
