@@ -1,0 +1,86 @@
+name: Train Delay Check
+
+on:
+  schedule:
+    # morning: monday~friday
+    # JST 07:30 (UTC 22:30, sunday~thursday)
+    - cron: '30 22 * * 0-4'
+    # JST 08:00 (UTC 23:00, sunday~thursday)
+    - cron: '00 23 * * 0-4'
+
+    # evening: monday~friday
+    # JST 17:00 (UTC 08:00, monday~friday)
+    - cron: '00 08 * * 1-5'
+    # JST 17:30 (UTC 08:30, monday~friday)
+    - cron: '30 08 * * 1-5'
+
+  workflow_dispatch:
+    inputs:
+      direction:
+        # 원래는 up이 하행, down이 상행이지만, 아이치구간에서는 물리적으로 역행하기 때문에 멋대로 정함
+        description: 'check direction: (up: 퇴근, down: 출근)'
+        required: true
+        default: 'up'
+        type: choice
+        options:
+          - up
+          - down
+
+jobs:
+  check-delay:
+    permissions:
+      contents: write  # 로그 작성용 쓰기권한
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Check Morning Commute (Down Line)
+        # 스케줄이 '22:30'이거나, 수동 실행 시 방향이 'down'일 때 실행
+        if: github.event.schedule == '30 22 * * 0-4' || github.event.schedule == '00 23 * * 0-4' || (github.event_name == 'workflow_dispatch' && github.event.inputs.direction == 'down')
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          TARGET_STATION: "刈谷"
+          DIRECTION: "down"
+          RANGE_N: "6"
+          ENABLE_ERROR_NOTIFICATION: "true" # 에러 발생시 알림 여부
+        run: python workflow/notify.py
+      
+      - name: Push Error Log
+        # notify.py 실행이 실패했을 때 로그 파일을 저장
+        if: failure()
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add workflow/logs/
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Log: Code Error detected." && git push)
+
+      - name: Check Evening Commute (Up Line)
+        # 스케줄이 '09:30'이거나, 수동 실행 시 방향이 'up'일 때 실행
+        if: github.event.schedule == '00 09 * * 1-5' || github.event.schedule == '30 09 * * 1-5' || (github.event_name == 'workflow_dispatch' && github.event.inputs.direction == 'up')
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          TARGET_STATION: "刈谷"
+          DIRECTION: "up"
+          RANGE_N: "6"
+          ENABLE_ERROR_NOTIFICATION: "true"
+        run: python workflow/notify.py
+
+      - name: Push Error Log (Evening)
+        # notify.py 실행이 실패했을 때 로그 파일을 저장
+        if: failure()
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add workflow/logs/
+          # 변경사항이 있을 때만 커밋
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Log: Code Error detected." && git push)
