@@ -8,7 +8,7 @@ project_root = os.path.dirname(current_dir)
 submodule_path = os.path.join(project_root, 'libs', 'utility_python')
 
 if submodule_path not in sys.path:
-    sys.path.append(submodule_path)
+    sys.path.insert(0, submodule_path)
 
 import src.module.printer as printer
 from src.module.printer import log_msg as log
