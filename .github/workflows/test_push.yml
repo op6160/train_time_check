@@ -1,0 +1,19 @@
+name: Test Train Check on Push
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+jobs:
+  test-check:
+    uses: ./.github/workflows/reusable_check.yml
+    with:
+      direction: 'down'
+      target_station: "刈谷"
+      range_n: "6"
+      enable_error_notification: "true"
+    secrets:
+      WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

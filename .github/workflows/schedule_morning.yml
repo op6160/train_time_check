@@ -1,0 +1,28 @@
+name: Morning Train Check
+
+on:
+  schedule:
+    # morning: monday~friday
+    # JST 07:30 (UTC 22:30, sunday~thursday)
+    - cron: '30 22 * * 0-4'
+    # JST 08:00 (UTC 23:00, sunday~thursday)
+    - cron: '00 23 * * 0-4'
+  workflow_dispatch:
+    inputs:
+      direction:
+        description: 'check direction: (up: 퇴근, down: 출근)'
+        required: true
+        default: 'down'
+        type: choice
+        options:
+          - down
+          - up
+
+jobs:
+  morning-check:
+    uses: ./.github/workflows/reusable_check.yml
+    with:
+      direction: ${{ inputs.direction || 'down' }}
+    secrets:
+      WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

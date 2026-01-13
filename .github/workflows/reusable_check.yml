@@ -1,0 +1,66 @@
+name: Reusable Train Check
+
+on:
+  workflow_call:
+    inputs:
+      direction:
+        required: true
+        type: string
+        description: 'check direction: (up: 퇴근, down: 출근)'
+      target_station:
+        required: false
+        type: string
+        default: "刈谷"
+      range_n:
+        required: false
+        type: string
+        default: "6"
+      enable_error_notification:
+        required: false
+        type: string
+        default: "true"
+    secrets:
+      WEBHOOK_URL:
+        required: true
+      GH_TOKEN:
+        required: true
+
+jobs:
+  check-delay:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write    # 이슈 생성 권한
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Check Commute
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          TARGET_STATION: ${{ inputs.target_station }}
+          DIRECTION: ${{ inputs.direction }}
+          RANGE_N: ${{ inputs.range_n }}
+          ENABLE_ERROR_NOTIFICATION: ${{ inputs.enable_error_notification }}
+        run: python workflow/notify.py
+
+      - name: Create Issue on Failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          TZ: 'Asia/Tokyo'
+        run: |
+          chmod +x workflow/report_failure.sh
+          ./workflow/report_failure.sh
