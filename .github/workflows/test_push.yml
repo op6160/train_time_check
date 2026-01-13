@@ -6,6 +6,10 @@ on:
       - dev
       - main
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   test-check:
     uses: ./.github/workflows/reusable_check.yml

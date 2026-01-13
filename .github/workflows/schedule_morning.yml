@@ -18,6 +18,10 @@ on:
           - down
           - up
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   morning-check:
     uses: ./.github/workflows/reusable_check.yml
