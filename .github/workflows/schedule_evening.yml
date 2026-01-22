@@ -8,15 +8,6 @@ on:
     # JST 17:30 (UTC 08:30, monday~friday)
     - cron: '30 08 * * 1-5'
   workflow_dispatch:
-    inputs:
-      direction:
-        description: 'check direction: (up: 퇴근, down: 출근)'
-        required: true
-        default: 'up'
-        type: choice
-        options:
-          - up
-          - down
 
 permissions:
   contents: read
@@ -26,7 +17,11 @@ jobs:
   evening-check:
     uses: ./.github/workflows/reusable_check.yml
     with:
-      direction: ${{ inputs.direction || 'up' }}
+      direction: "up"
+      target_station: "刈谷"
+      range_n: "6"
+      # enable_error_notification: "true"
+
     secrets:
       WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
