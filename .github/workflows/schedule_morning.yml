@@ -21,7 +21,7 @@ jobs:
     uses: ./.github/workflows/reusable_check.yml
     with:
       direction: "down"
-      target_station: "名古屋"
+      target_station: "金山"
       range_n: "6"
       # enable_error_notification: "true"
     secrets:
