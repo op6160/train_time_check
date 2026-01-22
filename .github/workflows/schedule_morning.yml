@@ -8,6 +8,9 @@ on:
     # JST 08:00 (UTC 23:00, sunday~thursday)
     - cron: '00 23 * * 0-4'
   workflow_dispatch:
+  push:
+    branches:
+      - dev
 
 permissions:
   contents: read
