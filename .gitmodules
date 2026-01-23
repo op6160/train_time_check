@@ -1,3 +1,4 @@
 [submodule "libs/utility_python"]
 	path = libs/utility_python
 	url = https://github.com/op6160/utility_python.git
+	branch = main 
