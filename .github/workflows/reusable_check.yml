@@ -54,7 +54,7 @@ jobs:
           DIRECTION: ${{ inputs.direction }}
           RANGE_N: ${{ inputs.range_n }}
           ENABLE_ERROR_NOTIFICATION: ${{ inputs.enable_error_notification }}
-        run: python workflow/notify.py
+        run: python .script/notify.py
 
       - name: Create Issue on Failure
         if: failure()
@@ -64,4 +64,4 @@ jobs:
           TZ: 'Asia/Tokyo'
         run: |
           chmod +x workflow/report_failure.sh
-          ./workflow/report_failure.sh
+          .script/report_failure.sh

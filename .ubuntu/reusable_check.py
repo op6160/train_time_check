@@ -24,8 +24,8 @@ if not os.path.exists(venv_path):
 
 venv_python = venv_path / "bin" / "python"
 
-notify_path = base_dir / "workflow" / "notify.py"
-fail_script = base_dir / "workflow" / "report_failure.sh"
+notify_path = base_dir / ".script" / "notify.py"
+fail_script = base_dir / ".script" / "report_failure.sh"
 
 parser = argparse.ArgumentParser(
     description="Reusable Train Check",
