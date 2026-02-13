@@ -1,25 +1,42 @@
 # config.py
 # you can set your webhook url and github token.
+# if you want to use .env, just set use_env = True
+use_env = True
 
-# === set your webhook url and github token here === #
+# === set your webhook url and github token directly from here === #
 # if you don't want to use webhook notice, set webhook_url = ""
 webhook_url = "set your webhook url here"
-send_issues = True
 
+# support development
 # if send_issues is True, you can set your github token.
+send_issues = False
 github_token = "set your github token here"
-
+# you can check your url and token by executing this script.
 # ================================================== #
+# check config
+if use_env:
+    print("[config] Use .env")
+    import os
+    import dotenv
+    
+    dotenv.load_dotenv()
 
-# check
-if webhook_url == "set your webhook url here":
-    raise RuntimeError("[config.py Error] Webhook URL is not set in config.py.")
-if send_issues and github_token == "set your github token here":
-    raise RuntimeError("[config.py Error] If you want to send issues, Github Token must be set in config.py.")
+    webhook_url = os.getenv("WEBHOOK_URL") or os.getenv("webhook_url")
+    github_token = os.getenv("GITHUB_TOKEN") or os.getenv("github_token")
+    send_issues = os.getenv("SEND_ISSUES") or os.getenv("send_issues")
+    
+    send_issues = True if send_issues == "True" else False
+    if webhook_url is None:
+        raise RuntimeError("[config Error] Webhook URL is not set in .env.")
+    elif send_issues and github_token is None:
+        raise RuntimeError("[config Error] If you want to send issues, Github Token must be set in .env.")
+else:
+    if webhook_url == "set your webhook url here":
+        raise RuntimeError("[config Error] Webhook URL is not set in config.py.")
+    if send_issues and github_token == "set your github token here":
+        raise RuntimeError("[config Error] If you want to send issues, Github Token must be set in config.py.")
 
-# if github_token == "set your github token here":
-#     raise RuntimeError("[config.py Error] Github Token is not set in config.py.")
-
+# validation
 def _validate_webhook_discord():
     import requests
     response = requests.get(webhook_url)
