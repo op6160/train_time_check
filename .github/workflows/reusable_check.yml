@@ -63,5 +63,5 @@ jobs:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
           TZ: 'Asia/Tokyo'
         run: |
-          chmod +x workflow/report_failure.sh
+          chmod +x .script/report_failure.sh
           .script/report_failure.sh
