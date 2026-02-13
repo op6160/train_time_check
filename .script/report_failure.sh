@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 # find log
 LOG_FILE=$(ls -t workflow/logs/*.log 2>/dev/null | head -n 1)
