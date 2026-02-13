@@ -72,9 +72,9 @@ if __name__ == "__main__":
     if _validate_webhook_discord():
         print("[Valid] Webhook url confirmed (No message sent).")
     else:
-        print("[Error] Discord Webhook URL is not valid.")
+        print("[config Error] Discord Webhook URL is not valid.")
     
     if _validate_github_token():
         print("[Valid] Github Token confirmed (No message sent).")
     else:
-        print("[Error] Github Token is not valid.")
+        print("[config Error] Github Token is not valid.")

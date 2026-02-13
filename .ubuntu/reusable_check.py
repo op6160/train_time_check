@@ -14,12 +14,12 @@ if not os.path.exists(venv_path):
     try:
         subprocess.run(["python3", "-m", "venv", str(venv_path)], check=True)
     except subprocess.CalledProcessError as e:
-        print(f"Failed to create virtual environment: {e}")
+        print(f"[reusable_check Error] Failed to create virtual environment: {e}")
         sys.exit(1)
     try:
         subprocess.run([str(venv_path / "bin" / "python"), "-m", "pip", "install", "-r", f"{base_dir}/requirements.txt"], check=True)
     except subprocess.CalledProcessError as e:
-        print(f"Failed to install requirements: {e}")
+        print(f"[reusable_check Error] Failed to install requirements: {e}")
         sys.exit(1)
 
 venv_python = venv_path / "bin" / "python"
@@ -61,7 +61,7 @@ except subprocess.CalledProcessError as e:
         env=env_vars,
         check=True,text=True)
     else:
-        print(f"[Commute Check] Failure script not found: {fail_script}")
+        print(f"[Reusable Check Error] Failure script not found: {fail_script}")
     
     sys.exit(1)
 
