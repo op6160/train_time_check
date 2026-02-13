@@ -1,7 +1,7 @@
 # crontab -e
 # chmod +x schedule_evening.sh
 # 30 17 * * 1-5 bash /home/ubuntu/schedule_evening.sh >> /home/ubuntu/cron.log 2>&1
-..venv/bin/python reusable_check.py \
+../venv/bin/python reusable_check.py \
  --target_station="刈谷" \
  --direction="up" \
  --range="6" \
