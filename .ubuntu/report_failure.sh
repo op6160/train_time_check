@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 
 # init path
 cd "$(dirname "$0")"
