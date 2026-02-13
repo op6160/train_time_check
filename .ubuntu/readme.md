@@ -5,7 +5,7 @@ Github Actions의 cron 기능이 불안정하기 때문에
 
  ## usage
 clone repository:
-```git clone https://github.com/op6160/train_time_check.git```
+```git clone --recurse-submodules https://github.com/op6160/train_time_check.git```
 set file permission:
 
 ```
