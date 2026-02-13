@@ -38,7 +38,7 @@ def send_webhook(url, message, notice_case="열차지연", detail=None):
     """
     Webhook URL 데이터, 메시지 전송
     """
-    if not url:
+    if url is None:
         logger.warning("Webhook URL is not set. Skipping notification.")
         return
 
@@ -51,7 +51,10 @@ def send_webhook(url, message, notice_case="열차지연", detail=None):
         response.raise_for_status()
         logger.info(f"Notification sent successfully: {response.status_code}")
     except Exception as e:
-        logger.error(f"Failed to send notification: {e}")
+        if url == "":
+            logger.info(f"Webhook url is empty. Sending notification is skipped.")
+        else:
+            logger.error(f"Failed to send notification: {e}")
 
 def check_train_status(target_station, direction, range_n):
     """
@@ -73,7 +76,7 @@ def main():
     range_n = int(os.environ.get("RANGE_N", 6))
     enable_error_notify = os.environ.get("ENABLE_ERROR_NOTIFICATION", "true").lower() == "true"
     
-    if not webhook_url:
+    if webhook_url is None:
         logger.error("WEBHOOK_URL environment variable is not set.")
         sys.exit(1)
 
