@@ -1,0 +1,2 @@
+# .sh file are always use LF(Linux style) eol
+*.sh text eol=lf
