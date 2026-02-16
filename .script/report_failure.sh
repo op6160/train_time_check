@@ -28,6 +28,6 @@ echo "Created Issue: $ISSUE_URL"
 # Discord webhook notification
 if [ -n "$WEBHOOK_URL" ]; then
     curl -H "Content-Type: application/json" \
-         -d "{\"content\": \"⚠️ **Workflow Failed**\n에러 로그가 이슈로 등록되었습니다:\n$ISSUE_URL\", \"username\": \"Train Delay Checker Error\"}" \
+         -d "{\"content\": \"⚠️ **Workflow Failed**\n error log was sent to the github issue:\n$ISSUE_URL\", \"username\": \"Train Delay Checker Error\"}" \
          "$WEBHOOK_URL"
 fi

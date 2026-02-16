@@ -66,12 +66,14 @@ JA_REPLACE_MAP = {
 }
 
 EN_REPLACE_MAP = {
+    # nowning change
     "kukankaisoku": "limited express",
     "kaisoku": "express",
     "shinkaisoku": "new express",
     "tokubetsukaisoku": "special express",
     "up": "Upper Line",
     "down": "Lower Line",
+    # station names
     "豊橋":"Toyohashi",
     "西小坂井":"NishiKozakai",
     "愛知御津":"Aichimito",
@@ -133,6 +135,7 @@ def ja_form():
     Set message form for Japanese.
     """
     return {
+        "lang_type": "ja",
         "train_type": "列車",
         "destination": "行き",
         "from_station": "駅から出発し、",
@@ -146,6 +149,7 @@ def ko_form():
     Set message form for Korean.
     """
     return {
+        "lang_type": "ko",
         "train_type": "열차",
         "destination": "행",
         "from_station": "역 출발, ",
@@ -159,6 +163,7 @@ def en_form():
     Set message form for English.
     """
     return {
+        "lang_type": "en",
         "train_type": "train",
         "destination": " going",
         "from_station": " from, ",

@@ -36,6 +36,7 @@ parser.add_argument("-s", "--target_station", type=str, required=True, help="Tar
 parser.add_argument("-d", "--direction", type=str, required=True, help="Direction of the train")
 parser.add_argument("-r", "--range", type=int, default=6, help="Range of stations to check")
 parser.add_argument("-e", "--enable_error_notification", action="store_true", help="Enable error notifications")
+parser.add_argument("-l", "--language", type=str, default="ko", help="Language for notifications(en, ko, ja)")
 
 args = parser.parse_args()
 env_vars = os.environ.copy()
@@ -44,10 +45,12 @@ env_vars.update({
     "TARGET_STATION": args.target_station,
     "DIRECTION": args.direction,
     "RANGE": str(args.range),
-    "ENABLE_ERROR_NOTIFICATION": str(args.enable_error_notification).lower()
+    "ENABLE_ERROR_NOTIFICATION": str(args.enable_error_notification).lower(),
+    "LANGUAGE": args.language
 })
 
 print(f"[Commute Check] Start workflow. Target Station: {args.target_station}, Direction: {args.direction}, Range: {args.range}, Enable Error Notification: {args.enable_error_notification}")
+print(f"[Commute Check] language: {args.language}")
 
 try:
     subprocess.run([venv_python, notify_path],env=env_vars,check=True,text=True)

@@ -14,15 +14,16 @@ sys.path.append(src_path)
 sys.path.append(root_dir)
 
 from api import get_train_status_range_api
+from notify_language_map import notify_ja_map, notify_en_map, notify_ko_map
 
-# 로거 설정
+# set logger
 logger = logging.getLogger("TrainCheck")
 handler = logging.StreamHandler(sys.stdout)
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
-# 파일 로거 추가 (workflow/logs)
+# set file logger (workflow/logs)
 log_dir = os.path.join(current_dir, "logs")
 os.makedirs(log_dir, exist_ok=True)
 
@@ -34,9 +35,9 @@ file_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 logger.setLevel(logging.INFO)
 
-def send_webhook(url, message, notice_case="열차지연", detail=None):
+def send_webhook(url, message, notice_case="train delay", detail=None):
     """
-    Webhook URL 데이터, 메시지 전송
+    Webhook URL, send data& message.
     """
     if url is None:
         logger.warning("Webhook URL is not set. Skipping notification.")
@@ -56,32 +57,54 @@ def send_webhook(url, message, notice_case="열차지연", detail=None):
         else:
             logger.error(f"Failed to send notification: {e}")
 
-def check_train_status(target_station, direction, range_n):
+def check_train_status(target_station, direction, range_n, language):
     """
-    열차 상태 확인 api 값 반환
+    train status check & call API
     """
     logger.info(f"Checking train status for {target_station} ({direction})...")
     return get_train_status_range_api(
         station=target_station,
         range_n=range_n,
-        language="ko",
+        language=language,
         direction=direction
     )
 
 def main():
-    # 설정값 로드
+    # load env 
     webhook_url = os.environ.get("WEBHOOK_URL")
     target_station = os.environ.get("TARGET_STATION", "刈谷")
     direction = os.environ.get("DIRECTION", "up")
     range_n = int(os.environ.get("RANGE_N", 6))
+    language = os.environ.get("LANGUAGE", "ko")
     enable_error_notify = os.environ.get("ENABLE_ERROR_NOTIFICATION", "true").lower() == "true"
     
     if webhook_url is None:
         logger.error("WEBHOOK_URL environment variable is not set.")
         sys.exit(1)
+    
+    # set language map
+    if language == "ja":
+        language_map = notify_ja_map
+    elif language == "en":
+        language_map = notify_en_map
+    elif language == "ko":
+        language_map = notify_ko_map
+    elif language == "jp":
+        # jp -> ja
+        language_map = notify_ja_map
+        logger.warning("The 'jp' language is deprecated. Please use 'ja' instead.")
+        language = "ja"
+    elif language == "kr":
+        # kr -> ko
+        language_map = notify_ko_map
+        logger.warning("The 'kr' language is deprecated. Please use 'ko' instead.")
+        language = "ko"
+    else:
+        logger.error(f"Unsupported language: {language}")
+        sys.exit(1)
 
     try:
-        result = check_train_status(target_station, direction, range_n)
+        result = check_train_status(target_station, direction, range_n, language)
 
         if result["status"] == "delay":
             notice_msg = result.get("notice_message", "")
@@ -93,9 +116,9 @@ def main():
                 return
 
             logger.info("Delay detected! Sending notification...")
-            full_message = f"❗열차 지연 발생\n[지연 열차 목록]\n{train_msgs}\n\n[운행 정보]\n{notice_msg}"
+            full_message = f"❗{language_map['alert_title']}\n[{language_map['train_list']}]\n{train_msgs}\n\n[{language_map['status_info']}]\n{notice_msg}"
             
-            send_webhook(webhook_url, full_message, "열차 지연" , result["raw_data"])
+            send_webhook(webhook_url, full_message, language_map['delay_sender'] , result['raw_data'])
         else:
             logger.info("Status is normal. No notification sent.")
 
@@ -103,9 +126,9 @@ def main():
         logger.error("An unexpected error occurred.", exc_info=True)
         
         if enable_error_notify:
-            error_message = f"⚠️ 열차 확인 스크립트 에러 발생\n\n{str(e)}"
+            error_message = f"⚠️ {language_map['error_occured']}\n\n{str(e)}"
             error_details = {"traceback": traceback.format_exc()}
-            send_webhook(webhook_url, error_message, "스크립트 에러", error_details)
+            send_webhook(webhook_url, error_message, language_map['script_error_sender'], error_details)
         
         sys.exit(1)
 
