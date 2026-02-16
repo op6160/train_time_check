@@ -3,15 +3,31 @@ from bs4 import BeautifulSoup
 import re
 
 from station import stationID as stations
-
-# const
-go_up_keyword = "【下り線】"
-go_down_keyword = "【上り線】"
-fine_keyword = "平常に運転しております。"
-BASE_URL = "https://traininfo.jr-central.co.jp/"
-STATE_URL = "zairaisen/status_detail.html?line=10001"
+from get_project_config import (
+    go_up_keyword,
+    go_down_keyword,
+    fine_keyword,
+    BASE_URL,
+    STATE_URL,
+)
+# # const
+# go_up_keyword = "【下り線】"
+# go_down_keyword = "【上り線】"
+# fine_keyword = "平常に運転しております。"
+# BASE_URL = "https://traininfo.jr-central.co.jp/"
+# STATE_URL = "zairaisen/status_detail.html?line=10001"
 url = BASE_URL + STATE_URL
 
+# TODO: 열차가 아예 출발도 못 한 상황에 대한 처리 필요.
+# 열차 시간표를 가져오는 무언가가 역시 아무래도 필요할 듯.
+# 열차시간표 : https://railway.jr-central.co.jp/time-schedule/srch/_pdf/data/202503/tokaido_Kariya_A_w_d.pdf
+# 파일이 업데이트 되기도 하는 거 같아서 직접 가져오는게 나을 것 같은데 그를 위해서는
+# https://railway.jr-central.co.jp/time-schedule/search/index.html 셀레니움 써야함
+# 근데 시간표가 pdf파일이라서, 온전히 데이터 취득이 되려나 보증 불가능
+# 새로 발생한 케이스로 분석 가능해 보임
+# TODO: 상하행선 열차 정보
+# 새로 발생한 케이스로 분석 가능해 보임
+# TODO: X API를 사용하는 것도 하나의 방법이 될 것 같다
 
 # text processing utility
 def text_remove_whitespace(text):
