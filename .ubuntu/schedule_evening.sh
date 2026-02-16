@@ -6,4 +6,5 @@ cd /home/ubuntu/services/train_time_check/.ubuntu
  --target_station="刈谷" \
  --direction="up" \
  --range="6" \
- --enable_error_notification
+ --enable_error_notification \
+ --language="ko"

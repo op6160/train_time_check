@@ -3,15 +3,14 @@ from bs4 import BeautifulSoup
 import re
 
 from station import stationID as stations
-
-# const
-go_up_keyword = "【下り線】"
-go_down_keyword = "【上り線】"
-fine_keyword = "平常に運転しております。"
-BASE_URL = "https://traininfo.jr-central.co.jp/"
-STATE_URL = "zairaisen/status_detail.html?line=10001"
+from get_project_config import (
+    go_up_keyword,
+    go_down_keyword,
+    fine_keyword,
+    BASE_URL,
+    STATE_URL,
+)
 url = BASE_URL + STATE_URL
-
 
 # text processing utility
 def text_remove_whitespace(text):
@@ -404,6 +403,8 @@ def write_state_message(language, train_data, notice_data, direction=None):
             message += f'"{info["from_station_name"]}"{message_form["from_station"]}"{info["to_station_name"]}"{message_form["to_station"]}'
         else:
             message += f'"{info["from_station_name"]}"{message_form["from_station"]}"{info["before_station_name"]}"{message_form["before_station"]}"{info["to_station_name"]}"{message_form["to_station"]}'
+        if message_form["lang_type"] != "ja":
+            message = message.replace("以上","+")
         return message
 
     def set_language_form(language):
@@ -425,6 +426,7 @@ def write_state_message(language, train_data, notice_data, direction=None):
     notice_message = "* notice:"
     train_message = []
 
+    # TODO: notice message is not translated
     if direction in ("up", "down"):
         direction_title = f"go_{direction}_title"
         direction_info = f"go_{direction}_info"

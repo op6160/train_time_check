@@ -10,7 +10,7 @@ on:
       target_station:
         required: false
         type: string
-        default: "刈谷"
+        default: "名古屋"
       range_n:
         required: false
         type: string
@@ -19,6 +19,10 @@ on:
         required: false
         type: string
         default: "true"
+      language:
+        required: false
+        type: string
+        default: "ko"
     secrets:
       WEBHOOK_URL:
         required: true
@@ -54,6 +58,7 @@ jobs:
           DIRECTION: ${{ inputs.direction }}
           RANGE_N: ${{ inputs.range_n }}
           ENABLE_ERROR_NOTIFICATION: ${{ inputs.enable_error_notification }}
+          LANGUAGE: ${{ inputs.language }}
         run: python .script/notify.py
 
       - name: Create Issue on Failure

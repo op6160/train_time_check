@@ -13,9 +13,3 @@ if submodule_path not in sys.path:
 from src.logger_lib import log_msg as log
 from src.time_lib import detail
 from src.browser_lib import headers, connection_test, get_html_content
-
-# import src.module.printer as printer
-# from src.module.printer import log_msg as log
-# from src.module.time_lib import detail
-# from src.module.connection import headers, connection_test
-# from src.module.browser import get_html_content
