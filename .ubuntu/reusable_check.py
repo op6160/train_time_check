@@ -24,7 +24,7 @@ if not os.path.exists(venv_path):
 
 venv_python = venv_path / "bin" / "python"
 
-notify_path = base_dir / ".script" / "notify.py"
+notify_path = base_dir / "src" / "notification" / "notify.py"
 fail_script = base_dir / ".script" / "report_failure.sh"
 
 parser = argparse.ArgumentParser(

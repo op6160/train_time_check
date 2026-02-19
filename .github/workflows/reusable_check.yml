@@ -59,7 +59,7 @@ jobs:
           RANGE_N: ${{ inputs.range_n }}
           ENABLE_ERROR_NOTIFICATION: ${{ inputs.enable_error_notification }}
           LANGUAGE: ${{ inputs.language }}
-        run: python .script/notify.py
+        run: python src/notification/notify.py
 
       - name: Create Issue on Failure
         if: failure()
