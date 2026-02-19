@@ -5,3 +5,4 @@ tests/mhtml/
 *.code-workspace
 env/
 tests/
+dev_*
