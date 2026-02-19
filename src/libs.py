@@ -20,7 +20,7 @@ from src.drive_lib import save_content, load_content, DiscordStrategy
 import logging
 
 # log directory 
-log_dir = os.path.join(current_dir, "logs")
+log_dir = os.path.join(root_path, "logs")
 os.makedirs(log_dir, exist_ok=True)
 
 # log filename
