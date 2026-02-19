@@ -1,7 +1,4 @@
 from src.parse.rate_train_info import get_train_rate_and_time_info
-from src.constants import en_form, dict_replace
-
-en_form()
 
 def write_state_message(language, train_data, notice_data, direction=None):
     """
@@ -25,19 +22,19 @@ def write_state_message(language, train_data, notice_data, direction=None):
 
     def set_language_form(language):
         if language == "en":
-            from constants import en_form
+            from src.constants import en_form
             return en_form()
         elif language == "ko":
-            from constants import ko_form
+            from src.constants import ko_form
             return ko_form()
         elif language == "ja":
-            from constants import ja_form
+            from src.constants import ja_form
             return ja_form()
         else:
             raise ValueError("error: language is not supported")
 
     message_form, replace_map = set_language_form(language)
-    from constants import dict_replace
+    from src.constants import dict_replace
 
     notice_message = "* notice:"
     train_message = []

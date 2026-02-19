@@ -26,7 +26,7 @@ venv_python = venv_path / "bin" / "python"
 
 # notify_path = base_dir / "src" / "notification" / "notify.py"
 notify_path = "src.notification.notify"
-fail_script = base_dir / "ubuntu" /"stress"/ "report_failure.sh"
+fail_script = base_dir / "ubuntu" / "report_failure.sh"
 
 parser = argparse.ArgumentParser(
     description="Reusable Train Check",

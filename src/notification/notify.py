@@ -56,8 +56,8 @@ def main():
         sys.exit(1)
 
     # set language map
-    set_language_map(language)
-
+    language_map = set_language_map(language)
+    discord = DiscordManager(webhook_url)
     # execute
     try:
         result = check_train_status(target_station, direction, range_n, language)
@@ -75,15 +75,15 @@ def main():
 
             logger.info("Delay detected! Sending notification...")
             full_message = \
-                f"""❗{language_map['alert_title']}
-                [{language_map['train_list']}]
-                {train_msgs}"""
+f"""❗{language_map['alert_title']}
+[{language_map['train_list']}]
+{train_msgs}"""
             if notice_msg:
                 full_message += \
-                    f"""\n\n[{language_map['status_info']}]
-                    {notice_msg}"""
+f"""\n\n[{language_map['status_info']}]
+{notice_msg}"""
+            full_message += "\n" + datetime.now().strftime("%H:%M:%S") + "\n"
 
-            discord = DiscordManager(webhook_url)
             discord.send_message(full_message, notice_case)
         else:
             logger.info("Status is normal. No notification sent.")
@@ -94,7 +94,7 @@ def main():
         if enable_error_notify:
             error_message = f"⚠️ {language_map['error_occured']}\n\n{str(e)}"
             error_details = {"traceback": traceback.format_exc()}
-            send_webhook(webhook_url, error_message, language_map['script_error_sender'], error_details)
+            discord.send_message(webhook_url, error_message, language_map['script_error_sender'], error_details)
         sys.exit(1)
 
 if __name__ == "__main__":

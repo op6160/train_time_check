@@ -1,5 +1,6 @@
 from src.libs import save_content, load_content, DiscordStrategy
 from src.libs import logger
+import requests
 
 class DiscordManager:
     def __init__(self, webhook_url: str):
