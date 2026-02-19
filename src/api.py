@@ -1,5 +1,5 @@
-from station import stationID as stations
-from get_contents import get_train_rate_and_time_info, write_state_message, print_message
+from src.parse.constants import stationID as stations
+from src.get_contents import get_train_rate_and_time_info, write_state_message, print_message
 
 def get_train_status_api(language="ko", direction=None):
     """

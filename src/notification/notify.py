@@ -1,12 +1,11 @@
 # src import
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
-from api import get_train_status_range_api
-from notify_language_map import notify_ja_map, notify_en_map, notify_ko_map
-from libs import logger
-from DiscordManager import DiscordManager
+from src.api import get_train_status_range_api
+from src.notification.constants import notify_ja_map, notify_en_map, notify_ko_map
+from src.libs import logger
+from src.DiscordManager import DiscordManager
 
 import json
 import requests

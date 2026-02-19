@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 set file permission:
 ```bash
-cd train_time_check/.ubuntu
+cd train_time_check/ubuntu
 chmod +x schedule_evening.sh
 chmod +x schedule_morning.sh
 ```
@@ -50,7 +50,7 @@ use_env = True
 ```
 <br>
 
-```/.ubuntu/.env``` required
+```/ubuntu/.env``` required
 ```.env
 webhook_url = "set your webhook url here"
 GITHUB_TOKEN = "set your github token here"
@@ -68,7 +68,7 @@ Execute Directly:
 ```
 
 Use Bourne Shell
-```./.ubuntu/schedule_morning.sh```
+```./ubuntu/schedule_morning.sh```
 
 Set Cron Table Automation:
 ```crontab -e```
@@ -76,9 +76,9 @@ Set Cron Table Automation:
 [cron set manual](https://www.ibm.com/docs/en/aix/7.3.0?topic=c-crontab-command)
 
 ```bash
-30 17 * * 1-5 bash ~/services/train_time_check/.ubuntu/schedule_evening.sh >> /home/ubuntu/cron.log 2>&1
-45 17 * * 1-5 bash ~/services/train_time_check/.ubuntu/schedule_evening.sh >> /home/ubuntu/cron.log 2>&1
+30 17 * * 1-5 bash ~/services/train_time_check/ubuntu/schedule_evening.sh >> /home/ubuntu/cron.log 2>&1
+45 17 * * 1-5 bash ~/services/train_time_check/ubuntu/schedule_evening.sh >> /home/ubuntu/cron.log 2>&1
 
-30 7 * * 1-5 ~/services/train_time_check/.ubuntu/schedule_morning.sh >> /home/ubuntu/cron.log 2>&1
-00 8 * * 1-5 ~/services/train_time_check/.ubuntu/schedule_morning.sh >> /home/ubuntu/cron.log 2>&1
+30 7 * * 1-5 ~/services/train_time_check/ubuntu/schedule_morning.sh >> /home/ubuntu/cron.log 2>&1
+00 8 * * 1-5 ~/services/train_time_check/ubuntu/schedule_morning.sh >> /home/ubuntu/cron.log 2>&1
 ```

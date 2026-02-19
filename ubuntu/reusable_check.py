@@ -1,4 +1,4 @@
-from config import webhook_url, github_token, send_issues
+from ubuntu.config import webhook_url, github_token, send_issues
 
 import os
 import sys
@@ -7,7 +7,7 @@ import subprocess
 from pathlib import Path
 
 base_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(base_dir))
+# sys.path.append(str(base_dir))
 
 venv_path = base_dir / "venv"
 if not os.path.exists(venv_path):
@@ -24,8 +24,9 @@ if not os.path.exists(venv_path):
 
 venv_python = venv_path / "bin" / "python"
 
-notify_path = base_dir / "src" / "notification" / "notify.py"
-fail_script = base_dir / ".script" / "report_failure.sh"
+# notify_path = base_dir / "src" / "notification" / "notify.py"
+notify_path = "src.notification.notify"
+fail_script = base_dir / "ubuntu" /"stress"/ "report_failure.sh"
 
 parser = argparse.ArgumentParser(
     description="Reusable Train Check",
@@ -53,7 +54,7 @@ print(f"[Commute Check] Start workflow. Target Station: {args.target_station}, D
 print(f"[Commute Check] language: {args.language}")
 
 try:
-    subprocess.run([venv_python, notify_path],env=env_vars,check=True,text=True)
+    subprocess.run([venv_python, "-m", notify_path],env=env_vars,check=True,text=True)
     print(f"[Commute Check] Workflow completed successfully.")
 except subprocess.CalledProcessError as e:
     print(f"[Commute Check] Workflow failed with error: {e}")
