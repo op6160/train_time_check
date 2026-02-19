@@ -59,7 +59,7 @@ jobs:
           RANGE_N: ${{ inputs.range_n }}
           ENABLE_ERROR_NOTIFICATION: ${{ inputs.enable_error_notification }}
           LANGUAGE: ${{ inputs.language }}
-        run: python -m src/notification/notify.py
+        run: python -m src.notification.notify.py
 
       - name: Create Issue on Failure
         if: failure()
@@ -68,5 +68,5 @@ jobs:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
           TZ: 'Asia/Tokyo'
         run: |
-          chmod +x ./report_failure.sh
-          ./report_failure.sh
+          chmod +x .github/workflows/report_failure.sh
+          . .github/workflows/report_failure.sh
