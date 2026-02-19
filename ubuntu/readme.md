@@ -60,7 +60,7 @@ SEND_ISSUES = "True"
 ## usage e.g.,
 Execute Directly:
 ```bash
-../venv/bin/python reusable_check.py \
+venv/bin/python -m ubuntu.reusable_check.py \
  --target_station="刈谷" \
  --direction="up" \
  --range="6" \
