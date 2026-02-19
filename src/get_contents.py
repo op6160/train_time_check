@@ -1,4 +1,4 @@
-from libs import get_html_content, log
+from libs import get_html_content, logger
 from bs4 import BeautifulSoup
 import re
 
@@ -102,8 +102,8 @@ def get_train_info(data):
         elif train_type == "tokubetsukaisoku":
             return 4
         else:
-            log(f"warning: unknown train type. {train_type}.")
-            log(f" the logic will be worked as normal train type.")
+            logger.info(f"warning: unknown train type. {train_type}.")
+            logger.info(f" the logic will be worked as normal train type.")
             return 0
 
     def set_from_to_staion_id(tps):
@@ -320,10 +320,10 @@ def get_train_rate_and_time_info():
             
             # add empty string to avoid go_up_title and go_down_title allocating error
             if len(go_up_info) == 0:
-                log("warn: go_up_info is empty")
+                logger.info("go_up_info is empty")
                 go_up_info.append("")
             if len(go_down_info) == 0:
-                log("warn: go_down_info is empty")
+                logger.info("go_down_info is empty")
                 go_down_info.append("")
             return go_down_info, go_up_info
 
