@@ -6,3 +6,4 @@ tests/mhtml/
 env/
 tests/
 dev_*
+*.mhtml
