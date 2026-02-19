@@ -1,39 +1,16 @@
+# src import
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
+from api import get_train_status_range_api
+from notify_language_map import notify_ja_map, notify_en_map, notify_ko_map
+from libs import logger
+
 import os
 import sys
 import json
 import requests
-import logging
 import traceback
 from datetime import datetime
-
-# src import
-current_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = os.path.dirname(current_dir)
-src_path = os.path.join(root_dir, "src")
-sys.path.append(src_path)
-sys.path.append(root_dir)
-
-from api import get_train_status_range_api
-from notify_language_map import notify_ja_map, notify_en_map, notify_ko_map
-
-# set logger
-logger = logging.getLogger("TrainCheck")
-handler = logging.StreamHandler(sys.stdout)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-# set file logger (workflow/logs)
-log_dir = os.path.join(current_dir, "logs")
-os.makedirs(log_dir, exist_ok=True)
-
-today_str = datetime.now().strftime("%Y-%m-%d")
-log_filename = f"train_check_{today_str}.log"
-
-file_handler = logging.FileHandler(os.path.join(log_dir, log_filename), encoding='utf-8')
-file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
-logger.setLevel(logging.INFO)
 
 def send_webhook(url, message, notice_case="train delay", detail=None):
     """
