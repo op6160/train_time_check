@@ -164,7 +164,7 @@ def get_train_rate_and_time_info():
 
     # get html
     url = BASE_URL + STATE_URL
-    html = get_html_content(url)
+    html = get_html_content(url = url, load_time = 3)
     soup = BeautifulSoup(html, 'html.parser')
 
     # get notice
