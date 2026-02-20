@@ -1,4 +1,3 @@
-from src.libs import save_content, load_content, DiscordStrategy
 from src.libs import logger
 import requests
 
@@ -22,24 +21,3 @@ class DiscordManager:
         except Exception as e:
             logger.error(f"Failed to send notification: {e}")
         return None
-
-class DiscordBot(DiscordManager):
-    def __init__(self, bot_token: str, channel_id: str, webhook_url: str):
-        super().__init__(webhook_url)
-
-        if not bot_token or not channel_id:
-            raise ValueError("DiscordManager requires 'bot_token' and 'channel_id'.")
-
-        self.bot_token = bot_token
-        self.channel_id = channel_id
-
-        self.drive_strategy = DiscordStrategy( 
-            bot_token=self.bot_token, 
-            channel_id=self.channel_id
-        )
-
-    def save_content(self, content, filename):
-        save_content(content, filename, self.drive_strategy)
-
-    def load_content(self, filename):
-        return load_content(filename, self.drive_strategy)
