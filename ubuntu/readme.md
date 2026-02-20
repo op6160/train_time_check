@@ -3,10 +3,11 @@ Github Actions의 cron 동작이 불안정하기 때문에, 안정성, 지속성
 Github Actions の cron 動作の不安定を回避するため、保有するサーバーリソースを使用、ubuntu OS の crontab を使用するために, ubuntu 用 python script を作成
 
 ## setup
-Python 3.9+
+Python 3.12+
 
 * If server is ARM architecture, required
 ```bash
+# ~/
 sudo apt update
 sudo apt install chromium-browser chromium-chromedriver
 ```
@@ -16,9 +17,20 @@ The chromedrive path required ```'/usr/bin/chromedriver'``` (default path)
 
 clone repository:
 ```git clone --recurse-submodules https://github.com/op6160/train_time_check.git```  <br>
+or
+```bash
+git clone https://github.com/op6160/train_time_check.git
+# /train_time_check/
+git submodule update --init --recursive
+```
+
+### * if utility_python updated, requires:
+```git submodule update --recursive --remote``` <br>
+※ I will update it with pypi module.
 
 install requirements:
 ```bash
+# /train_time_check/
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -26,7 +38,7 @@ pip install -r requirements.txt
 
 set file permission:
 ```bash
-cd train_time_check/ubuntu
+# /train_time_check/ubuntu/
 chmod +x schedule_evening.sh
 chmod +x schedule_morning.sh
 ```
@@ -58,7 +70,7 @@ SEND_ISSUES = "True"
 ```
 
 ## usage e.g.,
-Execute Directly:
+#### Execute Directly:
 ```bash
 venv/bin/python -m ubuntu.reusable_check.py \
  --target_station="刈谷" \
@@ -67,10 +79,11 @@ venv/bin/python -m ubuntu.reusable_check.py \
  --language="en"
 ```
 
-Use Bourne Shell
-```./ubuntu/schedule_morning.sh```
+#### Use Bourne Shell
+```./ubuntu/schedule_morning.sh``` <br>
+it requires to modify path `cd /home/ubuntu/services/train_time_check` in ```/ubunutu/schedule_morning.sh``` ```line 4```
 
-Set Cron Table Automation:
+#### Set Cron Table Automation:
 ```crontab -e```
 
 [cron set manual](https://www.ibm.com/docs/en/aix/7.3.0?topic=c-crontab-command)
