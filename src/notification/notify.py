@@ -11,6 +11,7 @@ import json
 import requests
 import traceback
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 def check_train_status(target_station, direction, range_n, language):
     """
