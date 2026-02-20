@@ -82,7 +82,7 @@ f"""❗{language_map['alert_title']}
                 full_message += \
 f"""\n\n[{language_map['status_info']}]
 {notice_msg}"""
-            full_message += "\n" + datetime.now().strftime("%H:%M:%S") + "\n"
+            full_message += "\n" + datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%H:%M:%S") + "\n"
 
             discord.send_message(full_message, notice_case)
         else:
