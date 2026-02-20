@@ -1,3 +1,4 @@
+#develop
 div/
 dev.*
 .env
@@ -7,3 +8,10 @@ env/
 tests/
 dev_*
 *.mhtml
+
+# server
+__pycache__/
+venv/
+*.out
+*issue_body.*
+logs/
