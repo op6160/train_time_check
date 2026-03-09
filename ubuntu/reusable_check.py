@@ -25,7 +25,7 @@ if not os.path.exists(venv_path):
 venv_python = venv_path / "bin" / "python"
 
 # notify_path = base_dir / "src" / "notification" / "notify.py"
-notify_path = "src.notification.notify"
+main_path = "main"
 fail_script = base_dir / "ubuntu" / "report_failure.sh"
 
 parser = argparse.ArgumentParser(
@@ -54,7 +54,7 @@ print(f"[Commute Check] Start workflow. Target Station: {args.target_station}, D
 print(f"[Commute Check] language: {args.language}")
 
 try:
-    subprocess.run([venv_python, "-m", notify_path],env=env_vars,check=True,text=True)
+    subprocess.run([venv_python, "-m", main_path],env=env_vars,check=True,text=True)
     print(f"[Commute Check] Workflow completed successfully.")
 except subprocess.CalledProcessError as e:
     print(f"[Commute Check] Workflow failed with error: {e}")
