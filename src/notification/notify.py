@@ -60,6 +60,6 @@ def send_error_notification(webhook_url, language, error, traceback_details):
     discord = DiscordManager(webhook_url)
     
     error_message = f"⚠️ {language_map['error_occured']}\n\n{str(error)}"
-    error_details_payload = {"traceback": traceback_details}
+    error_details_payload = f"traceback: {traceback_details}"
     
     discord.send_message(error_message + error_details_payload, language_map['script_error_sender'])
