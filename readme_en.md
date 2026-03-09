@@ -9,6 +9,19 @@ A server or device is required.
 > Verified OS: `mac 26.2`, `ubuntu 22.04`
 2. GitHub Actions: An alternative for users without a separate server environment. It can be activated by uncommenting the `cron` section in the `schedule_*.yml` files within `.github/workflows/`, and is also used for automatic debugging when the repository code is updated.
 
+## Update History
+### v1.0
+Initial release
+
+### v2.0 
+1. Functional improvements due to website updates
+- Status messages and operation information sources have been separated.
+- The overall structure, including element classes of the website, has been changed.
+2. Refactoring
+- Improved code structure: Reduced module mutual dependency by separating packages within `parse` and `notification`.
+3. Bug Fixes
+- Fixed an error where incorrect parameters were passed when calling `DiscordManager` in `Notification`.
+
 ## Key Features
 
 -   **Real-time Operation Information Check**: Scrapes the JR Central line website to check the current operational status.
