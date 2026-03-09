@@ -42,3 +42,11 @@ stationID = {
     "醒ヶ井":{"id":40, "symbol":"CA82", "name":"samegai","level":4},
     "米原":{"id":41, "symbol":"CA83", "name":"maibara","level":4}
 }
+
+NEW_TRAIN_TYPE = {
+    "local" : "normal",
+    "semi_rapid" : "kukankaisoku",
+    "new_rapid" : "shinkaisoku",
+    "special_rapid" : "tokubetsukaisoku",
+    "rapid" : "kaisoku",
+}

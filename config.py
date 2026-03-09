@@ -7,3 +7,5 @@ fine_keyword = "平常に運転しております。"
 # urls
 BASE_URL = "https://traininfo.jr-central.co.jp/"
 STATE_URL = "zairaisen/status_detail.html?line=10001"
+
+MESSAGE_URL = "zairaisen/train_information.html?line=10001&lang=ja"

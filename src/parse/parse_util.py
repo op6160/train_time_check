@@ -30,3 +30,8 @@ def text_normalizing_symbol(text):
 # data processing utility 
 def soup_find_all_div_by_id(soup, id):
     return soup.find_all("div", id = id)
+
+def multi_replace(text, replace_map):
+    for key, value in replace_map.items():
+        text = text.replace(key, value)
+    return text
