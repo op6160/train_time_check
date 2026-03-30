@@ -1,5 +1,6 @@
 from src.parse.rate_train_info import get_train_rate_and_time_info
 from src.parse.station_map import stationID as stations
+from src.language_map import en_form, ko_form, ja_form, dict_replace
 
 def write_state_message(language, train_data, notice_data, direction=None):
     """
@@ -12,30 +13,45 @@ def write_state_message(language, train_data, notice_data, direction=None):
         direction ("up" or "down", optional): the direction to write. If not given, write all data. 
     """
     def gen_message(info, message_form):
-        message = f'[{info["train_type"]}][{info["direction"]} {info["destination"]}{message_form["destination"]}] {info["train_rate_time_str"][1:]}{message_form["rate_time"]}\n'
-        if info["from_station_name"] == info["before_station_name"]:
-            message += f'"{info["from_station_name"]}"{message_form["from_station"]}"{info["to_station_name"]}"{message_form["to_station"]}'
+        # read data
+        train_type = info["train_type"]
+        direction = info["direction"]
+        destination = info["destination"]
+        how_long = info["train_rate_time_str"]
+        from_station = info["from_station_name"]
+        via_station = info["before_station_name"]
+        to_station = info["to_station_name"]
+
+        going = message_form["destination"]
+        delayed = message_form["rate_time"]
+        from_ = message_form["from_station"]
+        via_ = message_form["before_station"]
+        to_ = message_form["to_station"]
+
+        # write message
+        # 1st line: train type and delay time
+        message = f'[{train_type}][{direction} {destination}{going}] {how_long}{delayed}\n'
+        # 2nd line: from station (-> before station) -> to station
+        if from_station == via_station:
+            message += f'"{from_station}"{from_}"{to_station}"{to_}'
         else:
-            message += f'"{info["from_station_name"]}"{message_form["from_station"]}"{info["before_station_name"]}"{message_form["before_station"]}"{info["to_station_name"]}"{message_form["to_station"]}'
-        if message_form["lang_type"] != "ja":
-            message = message.replace("以上","+")
+            message += f'"{from_station}"{from_}"{via_station}"{via_}"{to_station}"{to_}'
+
+        # format message
+        message = message.replace("以上","+")
         return message
 
     def set_language_form(language):
         if language == "en":
-            from src.constants import en_form
             return en_form()
         elif language == "ko":
-            from src.constants import ko_form
             return ko_form()
         elif language == "ja":
-            from src.constants import ja_form
             return ja_form()
         else:
             raise ValueError("error: language is not supported")
 
     message_form, replace_map = set_language_form(language)
-    from src.constants import dict_replace
 
     notice_message = "* notice:"
     train_message = []
@@ -51,7 +67,8 @@ def write_state_message(language, train_data, notice_data, direction=None):
         for info in train_data.values():
             if info["direction"] == direction:
                 display_info = dict_replace(info, replace_map)
-                train_message.append(gen_message(display_info, message_form))
+                new_train_message = gen_message(display_info, message_form)
+                train_message.append(new_train_message)
 
     else:
         for msg in notice_data.values():
@@ -59,11 +76,14 @@ def write_state_message(language, train_data, notice_data, direction=None):
         for info in train_data.values():
             if info["direction"] == "up":
                 display_info = dict_replace(info, replace_map)
-                train_message.append(gen_message(display_info, message_form))
+                new_train_message = gen_message(display_info, message_form)
+                train_message.append(new_train_message)
+
         for info in train_data.values():
             if info["direction"] == "down":
                 display_info = dict_replace(info, replace_map)
-                train_message.append(gen_message(display_info, message_form))
+                new_train_message = gen_message(display_info, message_form)
+                train_message.append(new_train_message)
 
     if notice_message == "* notice:": notice_message = ""
     return notice_message, train_message
@@ -162,17 +182,6 @@ def get_train_status_range(station, range_n=6, language="ko", direction=None):
         "raw_data": train_data
     }
 
-if __name__ == "__main__":
-    # Test Code (CLI usage)
-    result = get_train_status_range_api("刈谷", range_n=6, language="ko", direction="up")
-    # result = get_train_status_api(language="ko", direction="up")
-    
-    if result["status"] == "normal":
-        print(result["message"])
-        print(result["data"])
-    else:
-        print_message(result["notice_message"], result["train_messages"])
-
 def print_message(notice_message, train_message):
     print("*" * 20)
     print(notice_message)
@@ -183,8 +192,8 @@ def print_message(notice_message, train_message):
 
 if __name__ == "__main__":
     # Test Code (CLI usage)
-    result = get_train_status_range_api("刈谷", range_n=6, language="ko", direction="up")
-    # result = get_train_status_api(language="ko", direction="up")
+    result = get_train_status_range("刈谷", range_n=6, language="ko", direction="up")
+    # result = get_train_status(language="ko", direction="up")
     
     if result["status"] == "normal":
         print(result["message"])

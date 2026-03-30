@@ -5,8 +5,10 @@ from zoneinfo import ZoneInfo
 from src.notification.notify_map import notify_ja_map, notify_en_map, notify_ko_map
 from src.libs import logger
 from src.notification.DiscordManager import DiscordManager
+from src.utility import list_to_multiline
 
-def set_language_map(language):
+
+def set_notify_map(language):
     if language == "ja" or language == "jp":
         if language == "jp": logger.warning("The 'jp' language is deprecated. Please use 'ja' instead.")
         return notify_ja_map
@@ -19,47 +21,55 @@ def set_language_map(language):
         logger.error(f"Unsupported language: {language}")
         sys.exit(1)
 
-def get_clean_train_msg_from_result(result):
-    train_messages_list = result.get("train_messages", [])
-    return "\n".join(train_messages_list)
-
 def send_delay_notification(webhook_url, language, result):
     """
     Formats and sends a train delay notification.
     """
-    language_map = set_language_map(language)
+    # set notify map
+    notify_map = set_notify_map(language)
+    # ini discord manager
     discord = DiscordManager(webhook_url)
 
-    train_messages = get_clean_train_msg_from_result(result)
+    # get train messages
+    train_messages = result.get("train_messages", [])
+    multiline_train_message = list_to_multiline(train_messages)
 
-    if not train_messages:
+    if not multiline_train_message:
         logger.info("Delay status detected, but no relevant trains or notices found in range. Skipping notification.")
         return
 
-    notice_case = language_map['delay_sender']
+    # 
+    notice_case = notify_map['delay_sender']
     notice_msg = result.get("notice_message", "")
+    
+    # message parts
+    alert_title = notify_map['alert_title']
+    train_list = notify_map['train_list']
+    status_info = notify_map['status_info']
 
     logger.info("Delay detected! Sending notification...")
+    # compose message
     full_message = \
-f"""❗{language_map['alert_title']}
-[{language_map['train_list']}]
-{train_messages}"""
+f"""❗{alert_title}
+[{train_list}]
+{multiline_train_message}"""
     if notice_msg:
         full_message += \
-f"""\n\n[{language_map['status_info']}]
+f"""\n\n[{status_info}]
 {notice_msg}"""
     full_message += "\n" + datetime.now(ZoneInfo("Asia/Tokyo")).strftime("%H:%M:%S") + "\n"
 
     discord.send_message(full_message, notice_case)
+    return
 
 def send_error_notification(webhook_url, language, error, traceback_details):
     """
     Formats and sends a script error notification.
     """
-    language_map = set_language_map(language)
+    notify_map = set_notify_map(language)
     discord = DiscordManager(webhook_url)
     
-    error_message = f"⚠️ {language_map['error_occured']}\n\n{str(error)}"
+    error_message = f"⚠️ {notify_map['error_occured']}\n\n{str(error)}"
     error_details_payload = f"traceback: {traceback_details}"
     
-    discord.send_message(error_message + error_details_payload, language_map['script_error_sender'])
+    discord.send_message(error_message + error_details_payload, notify_map['script_error_sender'])
