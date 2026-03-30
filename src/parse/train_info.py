@@ -1,4 +1,4 @@
-from src.parse.constants import stationID as stations
+from src.parse.station_map import stationID as stations
 from src.parse.parse_util import re_form
 import os
 import sys

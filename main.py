@@ -2,7 +2,7 @@ import os
 import sys
 import traceback
 
-from src.get_contents import get_train_status_range
+from src.contents.get_contents import get_train_status_range
 from src.libs import logger
 from src.notification.notify import send_delay_notification, send_error_notification
 

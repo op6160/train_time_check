@@ -2,9 +2,9 @@ import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from src.notification.constants import notify_ja_map, notify_en_map, notify_ko_map
+from src.notification.notify_map import notify_ja_map, notify_en_map, notify_ko_map
 from src.libs import logger
-from src.DiscordManager import DiscordManager
+from src.notification.DiscordManager import DiscordManager
 
 def set_language_map(language):
     if language == "ja" or language == "jp":
