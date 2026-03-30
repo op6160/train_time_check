@@ -57,16 +57,19 @@ def get_train_rate_and_time_info() -> tuple[bool, dict, dict]:
     message_soup = get_soup_by_url(BASE_URL + MESSAGE_URL)
 
     # notice data parse
-    state_train, notice_data, state_title = notice_data_flow(message_soup)
+    # __state_train is the remnant of the previous version. 
+    # it replaced 'not delayed_train_data'.
+    __state_train, notice_data, state_title = notice_data_flow(message_soup)
+    delayed_train_data = train_data_flow(soup)
+    state_train = not delayed_train_data  # == {}
 
     if not state_train:
         # has delay data
-        train_data = train_data_flow(soup)
+        delayed_train_data = train_data_flow(soup)
     else:
         # no delay data
-        train_data = {}
         notice_data = {"state_title": state_title} # state_tilte is webhook message title, in this case, other notice_data is empty.
-    return state_train, notice_data, train_data
+    return state_train, notice_data, delayed_train_data
         
 
 def notice_data_flow(soup: BeautifulSoup) -> tuple[bool, dict, str]:
@@ -143,5 +146,5 @@ def train_data_flow(soup: BeautifulSoup) -> dict:
 
     # parse the train elements
     train_data = element_format_train_data(all_train_element)
-    train_data = filter_delayed(train_data)
-    return train_data
+    delayed_train_data = filter_delayed(train_data)
+    return delayed_train_data
