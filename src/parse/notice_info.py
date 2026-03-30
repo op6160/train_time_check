@@ -1,6 +1,10 @@
 import re
 from src.libs import logger
-
+from config import (
+    go_up_keyword,
+    go_down_keyword,
+    fine_keyword,
+)
 def get_driving_state(soup):
     """
     TODO: this function should be refactored.
