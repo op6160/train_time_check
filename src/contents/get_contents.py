@@ -58,11 +58,11 @@ def write_state_message(language, train_data, notice_data, direction=None):
 
     # TODO: notice message is not translated
     if direction in ("up", "down"):
-        direction_title = f"go_{direction}_title"
-        direction_info = f"go_{direction}_info"
-        notice_message += f"{notice_data[direction_title]}" if notice_data[direction_title] else ""
-        notice_message += "\n" if notice_data[direction_title] and notice_data[direction_info] else ""
-        notice_message += f"{notice_data[direction_info]}" if notice_data[direction_info] else ""
+        direction_title = notice_data.get(f"go_{direction}_title", "")
+        direction_info = notice_data.get(f"go_{direction}_info", "")
+        notice_message += f"{direction_title}" if direction_title else ""
+        notice_message += "\n" if direction_title and direction_info else ""
+        notice_message += f"{direction_info}" if direction_info else ""
 
         for info in train_data.values():
             if info["direction"] == direction:
