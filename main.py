@@ -2,16 +2,16 @@ import os
 import sys
 import traceback
 
-from src.api import get_train_status_range_api
+from src.get_contents import get_train_status_range
 from src.libs import logger
 from src.notification.notify import send_delay_notification, send_error_notification
 
 def check_train_status(target_station, direction, range_n, language):
     """
-    train status check & call API
+    train status check & call out train status function
     """
     logger.info(f"Checking train status for {target_station} ({direction})...")
-    return get_train_status_range_api(
+    return get_train_status_range(
         station=target_station,
         range_n=range_n,
         language=language,
