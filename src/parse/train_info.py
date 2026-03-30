@@ -9,14 +9,14 @@ from src.parse.station_map import NEW_TRAIN_TYPE
 
 from src.libs import logger
 
+stations_by_id = {info["id"]: (name, info) for name, info in stations.items()}
+
 def find_station_by_id(id):
     """
     Find a station name and station's info by its id.
     Return: (station_name:str, station_info:dict)
     """
-    for name, value in stations.items():
-        if value["id"] == id:
-            return name, value
+    return stations_by_id.get(id, (None, None))
 
 def get_train_level(train_type:str)->int:
     """
