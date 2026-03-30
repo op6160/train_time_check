@@ -106,6 +106,7 @@ def get_train_status(language="ko", direction=None):
     state_train, notice_data, train_data = get_train_rate_and_time_info()
     
     if state_train:
+        # All trains are operating normally (no delay data)
         return {
             "status": "normal",
             "message": "All trains are operating normally.",
@@ -142,10 +143,12 @@ def get_train_status_range(station, range_n=6, language="ko", direction=None):
     state_train, notice_data, train_data = get_train_rate_and_time_info()
 
     if state_train:
+        # All trains are operating normally (no delay data)
+        state_title = notice_data["state_title"]
         return {
             "status": "normal",
             "message": "All trains are operating normally.",
-            "data": notice_data
+            "data": state_title
         }
     
     # Filter logic
