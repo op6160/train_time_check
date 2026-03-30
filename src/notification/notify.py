@@ -20,8 +20,8 @@ def set_language_map(language):
         sys.exit(1)
 
 def get_clean_train_msg_from_result(result):
-    train_msgs_list = result.get("train_messages", [])
-    return "\n".join(train_msgs_list)
+    train_messages_list = result.get("train_messages", [])
+    return "\n".join(train_messages_list)
 
 def send_delay_notification(webhook_url, language, result):
     """
@@ -30,9 +30,9 @@ def send_delay_notification(webhook_url, language, result):
     language_map = set_language_map(language)
     discord = DiscordManager(webhook_url)
 
-    train_msgs = get_clean_train_msg_from_result(result)
+    train_messages = get_clean_train_msg_from_result(result)
 
-    if not train_msgs:
+    if not train_messages:
         logger.info("Delay status detected, but no relevant trains or notices found in range. Skipping notification.")
         return
 
@@ -43,7 +43,7 @@ def send_delay_notification(webhook_url, language, result):
     full_message = \
 f"""❗{language_map['alert_title']}
 [{language_map['train_list']}]
-{train_msgs}"""
+{train_messages}"""
     if notice_msg:
         full_message += \
 f"""\n\n[{language_map['status_info']}]
