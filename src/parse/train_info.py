@@ -1,11 +1,11 @@
-from src.parse.station_map import stationID as stations
+from src.constants.station_map import stationID as stations
 
 import os
 import sys
 
 import re
 from src.parse.parse_util import multi_replace
-from src.parse.station_map import NEW_TRAIN_TYPE
+from src.constants.station_map import NEW_TRAIN_TYPE
 
 from src.libs import logger
 

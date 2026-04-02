@@ -1,5 +1,5 @@
 from src.parse.rate_train_info import get_train_rate_and_time_info
-from src.parse.station_map import stationID as stations
+from src.constants.station_map import stationID as stations
 from src.contents.message import write_state_message
 
 

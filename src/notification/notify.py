@@ -2,7 +2,7 @@ import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from src.notification.notify_map import notify_ja_map, notify_en_map, notify_ko_map
+from src.constants.notify_map import notify_ja_map, notify_en_map, notify_ko_map
 from src.libs import logger
 from src.notification.DiscordManager import DiscordManager
 from src.utility import list_to_multiline
