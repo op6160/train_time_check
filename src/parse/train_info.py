@@ -37,52 +37,52 @@ def get_train_level(train_type:str)->int:
         logger.info(f" the logic will be worked as normal train type.")
         return 0
 
-def set_from_to_staion_id(tps, station_id):
+def set_before_to_staion_id(tps, station_id):
         """
-        Set from_station_id and to_station_id based on the given train params.
+        Set before_passed_station_id and to_station_id based on the given train params.
 
         Args:
             tps ( dict ): train params
 
         Returns:
-            from_station_name ( str ): from station name
-            to_station_name ( str ): to station name
-            from_station_id ( int ): from station id to use in get_before_station
+            before_passed_station ( str ): before station name
+            to_station ( str ): to station name
+            before_passed_station_id ( int ): before station id to use in get_before_station
         """
         down_on_station_case = tps["on_station"] == "1" and tps["direction"] == "l"
         down_not_on_station_case = tps["on_station"] == "0" and tps["direction"] == "l"
         up_case = tps["direction"] == "r"
 
         if down_on_station_case:
-            from_station_id = station_id + 1
+            before_passed_station_id = station_id + 1
             to_station_id = station_id
         elif down_not_on_station_case:
-            from_station_id = station_id
+            before_passed_station_id = station_id
             to_station_id = station_id - 1
         elif up_case:
-            from_station_id = station_id
+            before_passed_station_id = station_id
             to_station_id = station_id + 1
         else:
             raise Exception("Invalid train params")
-        from_station_name, ___ = find_station_by_id(from_station_id)
-        to_station_name, ___ = find_station_by_id(to_station_id)
+        before_passed_station, ___ = find_station_by_id(before_passed_station_id)
+        to_station, ___ = find_station_by_id(to_station_id)
 
-        return from_station_name, to_station_name, from_station_id , to_station_id 
+        return before_passed_station, to_station, before_passed_station_id , to_station_id 
 
-def get_before_station(current_from_id, train_level, direction):
+def get_before_station(current_before_id, train_level, direction):
         """
         Find a before stop station name by train,station level.
         """
         # XXX: 데이터 구조를 잘못 설계해서, idx기반으로 구현했음
         values = list(stations.values())
         if direction == "up":
-            if values[current_from_id]["level"] < train_level: #역의 레벨이 기차레벨보다 낮을 때
-                return get_before_station(current_from_id - 1, train_level, direction)
+            if values[current_before_id]["level"] < train_level: #역의 레벨이 기차레벨보다 낮을 때
+                return get_before_station(current_before_id - 1, train_level, direction)
         elif direction == "down":
-            if values[current_from_id]["level"] < train_level:
-                return get_before_station(current_from_id + 1, train_level, direction)
+            if values[current_before_id]["level"] < train_level:
+                return get_before_station(current_before_id + 1, train_level, direction)
         keys = list(stations.keys())
-        station_name = keys[current_from_id]
+        station_name = keys[current_before_id]
         station_id = str(stations[station_name]["id"])
         return station_name, station_id
 
@@ -193,10 +193,10 @@ def element_format_train_data(all_train_element):
                         "train_level":int, 
                         "direction":str, 
                         "destination":str, 
-                        "from_station_name":str, 
-                        "to_station_name":str,
+                        "before_passed_station":str, 
+                        "to_station":str,
                         "train_rate_time_str":str,
-                        "before_station_name":str,
+                        "arrived_station":str,
                         "before_station_id":str
                     }
             }
@@ -222,9 +222,9 @@ def element_format_train_data(all_train_element):
             }
             station_id = int(station_id)
             # get train info
-            from_station_name, to_station_name, from_station_id, to_station_id = set_from_to_staion_id(tps, station_id)
-            before_station_name, before_station_id = get_before_station(from_station_id, train_level, direction)
-            next_station_name, next_station_id = get_next_station(to_station_id, train_level, direction)
+            before_passed_station, to_station, before_passed_station_id, to_station_id = set_before_to_staion_id(tps, station_id)
+            arrived_station, before_station_id = get_before_station(before_passed_station_id, train_level, direction)
+            next_stop, next_station_id = get_next_station(to_station_id, train_level, direction)
             # info-3.parse the contents
             from src.parse.formatting import train_rate_time_formatting, destination_formatting
             destination = item["data"].find(class_=re.compile("to-station")).get_text(strip=True)
@@ -238,27 +238,16 @@ def element_format_train_data(all_train_element):
                 "train_level": train_level,
                 "direction": direction,
                 "destination": destination,
-                "from_station_name": from_station_name,
-                "to_station_name": to_station_name,
+                "before_passed_station": before_passed_station,
+                "to_station": to_station,
                 "train_rate_time_str": train_rate_time_str,
-                "before_station_name": before_station_name,
+                "arrived_station": arrived_station,
                 "before_station_id": before_station_id,
-                "next_station_name": next_station_name,
+                "next_stop": next_stop,
                 "next_station_id": next_station_id
             }
             train_data[station_id] = unit_data
     return train_data
 
 def filter_delayed(train_data):
-    from tests.debug_lib import debug
-    result = {}
-    print("All train data")
-    debug(train_data)
-    for k, v in train_data.items():
-        if v["train_rate_time_str"]:
-            result[k] = v
-        else:
-            print("delay fitered train")
-            debug(v)
-    return result
     return {k:v for k,v in train_data.items() if v["train_rate_time_str"]}

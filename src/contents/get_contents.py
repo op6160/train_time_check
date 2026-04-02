@@ -76,7 +76,7 @@ def get_train_status_range(station, range_n=6, language="ko", direction=None):
             if v["direction"] != direction:
                 continue
             
-            current_id = get_station_id(v["from_station_name"])
+            current_id = get_station_id(v["arrived_station"])
             if current_id is None:
                 continue
 

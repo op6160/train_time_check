@@ -45,10 +45,10 @@ def get_train_rate_and_time_info() -> tuple[bool, dict, dict]:
                         "train_level":int, 
                         "direction":str, 
                         "destination":str, 
-                        "from_station_name":str, 
-                        "to_station_name":str,
+                        "before_passed_station":str, 
+                        "to_station":str,
                         "train_rate_time_str":str,
-                        "before_station_name":str,
+                        "arrived_station":str,
                         "before_station_id":str
                     }
             }
@@ -121,10 +121,10 @@ def train_data_flow(soup: BeautifulSoup) -> dict:
                         "train_level":int, 
                         "direction":str, 
                         "destination":str, 
-                        "from_station_name":str, 
-                        "to_station_name":str,
+                        "before_passed_station":str, 
+                        "to_station":str,
                         "train_rate_time_str":str,
-                        "before_station_name":str,
+                        "arrived_station":str,
                         "before_station_id":str
                     }
             }

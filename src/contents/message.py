@@ -18,10 +18,10 @@ def write_state_message(language, train_data, notice_data, direction=None):
         how_long = info["train_rate_time_str"]
         # from_station = info["from_station_name"] # it was changed
         # via_station = info["before_station_name"] # it was changed
-        arrived_station = info["before_station_name"]
-        before_passed_station = info["from_station_name"]
-        to_station = info["to_station_name"]
-        next_stop = info["next_station_name"]
+        arrived_station = info["arrived_station"]
+        before_passed_station = info["before_passed_station"]
+        to_station = info["to_station"]
+        next_stop = info["next_stop"]
 
         going = message_form["destination"]
         delayed = message_form["rate_time"]
@@ -40,8 +40,6 @@ def write_state_message(language, train_data, notice_data, direction=None):
         message += "["
         if not arrived_station == before_passed_station: 
             message += f"{before_passed_station}{via_}"
-        if not arrived_station == before_passed_station and to_station == next_stop: 
-            message += f","
         # to_station: next_station, next_stop: next_stop_station
         if to_station == next_stop:
             message += f"{arrive_soon}"
