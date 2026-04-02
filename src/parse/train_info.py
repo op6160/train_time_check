@@ -139,17 +139,8 @@ def get_all_train_element(position_info, all_train_element, train_in):
                 if "2_or_more" in element.get("src"):
                     overchild = element
 
-            # add normal train 
-            if found_child and station_id != -1:
-                for child in found_child:
-                    all_train_element[str(station_id)].append({
-                        "direction": direction,
-                        "train_in": train_in,
-                        "data": child.parent,
-                    })
-
-            # add special case's child train
             if overchild:
+                # add special case's child train
                 childs = overchild.select(".position-info__popup .position-item")
                 for child in childs:
                     all_train_element[str(station_id)].append({
@@ -157,6 +148,15 @@ def get_all_train_element(position_info, all_train_element, train_in):
                     "train_in": train_in,
                     "data": child.parent,
                 })
+            else:
+                # add normal train 
+                if found_child and station_id != -1 and overchild is None:
+                    for child in found_child:
+                        all_train_element[str(station_id)].append({
+                            "direction": direction,
+                            "train_in": train_in,
+                            "data": child.parent,
+                        })
     return all_train_element
 
 def element_format_train_data(all_train_element):
