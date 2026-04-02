@@ -21,6 +21,8 @@ Initial release
 - Improved code structure: Reduced module mutual dependency by separating packages within `parse` and `notification`.
 3. Bug Fixes
 - Fixed an error where incorrect parameters were passed when calling `DiscordManager` in `Notification`.
+4. Output Improvements
+- Detailed: 🟢Arrived Station 🛑Next Stop Station [Passed -> next passed(or arriving)]
 
 ## Key Features
 
