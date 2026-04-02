@@ -141,7 +141,8 @@ def ja_form():
         "from_station": "駅から出発し、",
         "before_station": "駅を通過、",
         "to_station": "へ移動中。",
-        "rate_time": "分遅れ"
+        "rate_time": "分遅れ",
+        "arrive_soon": "まもなく到着"
     }, JA_REPLACE_MAP
 
 def ko_form():
@@ -155,7 +156,8 @@ def ko_form():
         "from_station": "역 출발, ",
         "before_station": "역 통과, ",
         "to_station": "역 이동중",
-        "rate_time": "분 지연"
+        "rate_time": "분 지연",
+        "arrive_soon": "곧 도착"
     }, KO_REPLACE_MAP
 
 def en_form():
@@ -169,5 +171,6 @@ def en_form():
         "from_station": " from, ",
         "before_station": " via, ",
         "to_station": " to",
-        "rate_time": " mins late"
+        "rate_time": " mins late",
+        "arrive_soon": " arrive soon"
     }, EN_REPLACE_MAP

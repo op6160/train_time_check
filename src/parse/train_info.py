@@ -67,7 +67,7 @@ def set_from_to_staion_id(tps, station_id):
         from_station_name, ___ = find_station_by_id(from_station_id)
         to_station_name, ___ = find_station_by_id(to_station_id)
 
-        return from_station_name, to_station_name, from_station_id  
+        return from_station_name, to_station_name, from_station_id , to_station_id 
 
 def get_before_station(current_from_id, train_level, direction):
         """
@@ -83,6 +83,23 @@ def get_before_station(current_from_id, train_level, direction):
                 return get_before_station(current_from_id + 1, train_level, direction)
         keys = list(stations.keys())
         station_name = keys[current_from_id]
+        station_id = str(stations[station_name]["id"])
+        return station_name, station_id
+
+def get_next_station(current_to_id, train_level, direction):
+        """
+        Find a next stop station name by train,station level.
+        """
+        # XXX: 데이터 구조를 잘못 설계해서, idx기반으로 구현했음
+        values = list(stations.values())
+        if direction == "up":
+            if values[current_to_id]["level"] < train_level: #역의 레벨이 기차레벨보다 낮을 때
+                return get_next_station(current_to_id + 1, train_level, direction)
+        elif direction == "down":
+            if values[current_to_id]["level"] < train_level:
+                return get_next_station(current_to_id - 1, train_level, direction)
+        keys = list(stations.keys())
+        station_name = keys[current_to_id]
         station_id = str(stations[station_name]["id"])
         return station_name, station_id
 
@@ -197,7 +214,7 @@ def element_format_train_data(all_train_element):
             direction = item["direction"]
             
             # info-2.get the train informations
-            # function parameters
+            # function parameters, it was used in before system.
             tps = {
                 "on_station": "1" if item["train_in"] == "on" else "0",
                 "direction": "r" if direction == "up" else "l",
@@ -205,9 +222,9 @@ def element_format_train_data(all_train_element):
             }
             station_id = int(station_id)
             # get train info
-            from_station_name, to_station_name, from_station_id = set_from_to_staion_id(tps, station_id)
+            from_station_name, to_station_name, from_station_id, to_station_id = set_from_to_staion_id(tps, station_id)
             before_station_name, before_station_id = get_before_station(from_station_id, train_level, direction)
-            
+            next_station_name, next_station_id = get_next_station(to_station_id, train_level, direction)
             # info-3.parse the contents
             from src.parse.formatting import train_rate_time_formatting, destination_formatting
             destination = item["data"].find(class_=re.compile("to-station")).get_text(strip=True)
@@ -226,9 +243,22 @@ def element_format_train_data(all_train_element):
                 "train_rate_time_str": train_rate_time_str,
                 "before_station_name": before_station_name,
                 "before_station_id": before_station_id,
+                "next_station_name": next_station_name,
+                "next_station_id": next_station_id
             }
             train_data[station_id] = unit_data
     return train_data
 
 def filter_delayed(train_data):
+    from tests.debug_lib import debug
+    result = {}
+    print("All train data")
+    debug(train_data)
+    for k, v in train_data.items():
+        if v["train_rate_time_str"]:
+            result[k] = v
+        else:
+            print("delay fitered train")
+            debug(v)
+    return result
     return {k:v for k,v in train_data.items() if v["train_rate_time_str"]}
