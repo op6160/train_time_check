@@ -8,6 +8,7 @@ env/
 tests/
 dev_*
 *.mhtml
+.vscode/
 
 # server
 __pycache__/
