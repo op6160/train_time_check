@@ -8,6 +8,7 @@ from dataclasses import dataclass
 @dataclass
 class TrainDataModel:
     id: str
+    train_type: str
     train_level: int
     direction: str
     destination: str
@@ -42,3 +43,13 @@ class MessageDataModel:
     is_train_state_normal: bool
     notice_data: NoticeDataModel
     train_data_list: list[TrainDataModel]
+
+
+@dataclass
+class TrainStatusModel:
+    status: str #
+    status_message: str #
+    notice_message: str #
+    train_message: str #
+    notice_data: NoticeDataModel #
+    raw_data: list[TrainDataModel]
