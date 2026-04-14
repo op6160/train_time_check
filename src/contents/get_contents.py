@@ -2,9 +2,12 @@ from src.parse.rate_train_info import get_train_rate_and_time_info
 from src.constants.station_map import stationID as stations
 from src.contents.message import write_state_message
 
+from src.model.model import TrainStatusModel
+
+NO_MESSAGE = None # No message.
 
 # use
-def get_train_status(language="ko", direction=None):
+def get_train_status(language="ko", direction=None) -> TrainStatusModel:
     """
     API Entry point to get train status.
     
@@ -18,25 +21,30 @@ def get_train_status(language="ko", direction=None):
     # Normalize language code if necessary (e.g., jp -> ja)
     if language == "jp": language = "ja"
 
-    state_train, notice_data, train_data = get_train_rate_and_time_info()
+    is_train_state_normal, notice_data, train_data_list = get_train_rate_and_time_info()
     
-    if state_train:
+    if is_train_state_normal:
         # All trains are operating normally (no delay data)
-        return {
-            "status": "normal",
-            "message": "All trains are operating normally.",
-            "data": notice_data
-        }
+        return TrainStatusModel(
+            status="normal",
+            status_message="All trains are operating normally. No notification sent.",
+            notice_message=NO_MESSAGE,
+            train_message=NO_MESSAGE,
+            notice_data=notice_data,
+            raw_data=train_data_list
+        )
     else:
-        notice_message, train_message = write_state_message(language, train_data, notice_data, direction)
-        return {
-            "status": "delay",
-            "notice_message": notice_message,
-            "train_messages": train_message,
-            "raw_data": train_data
-        }
+        notice_message, train_message = write_state_message(language, train_data_list, notice_data, direction)
+        return TrainStatusModel(
+            status="delay",
+            status_message="Some trains are delayed.",
+            notice_message=notice_message,
+            train_message=train_message,
+            notice_data=notice_data,
+            raw_data=train_data_list
+        )
 
-def get_train_status_range(station, range_n=6, language="ko", direction=None):
+def get_train_status_range(station, range_n=6, language="ko", direction=None) -> TrainStatusModel:
     """
     API Entry point to get train status filtered by target station and range.
     
@@ -55,66 +63,47 @@ def get_train_status_range(station, range_n=6, language="ko", direction=None):
     # Normalize language
     if language == "jp": language = "ja"
 
-    state_train, notice_data, train_data = get_train_rate_and_time_info()
+    is_train_state_normal, notice_data, train_data_list = get_train_rate_and_time_info()
 
-    if state_train:
+    if is_train_state_normal:
         # All trains are operating normally (no delay data)
-        state_title = notice_data["state_title"]
-        return {
-            "status": "normal",
-            "message": "All trains are operating normally.",
-            "data": state_title
-        }
-    
+        return TrainStatusModel(
+            status="normal",
+            status_message="All trains are operating normally. No notification sent.",
+            notice_message=NO_MESSAGE,
+            train_message=NO_MESSAGE,
+            notice_data=notice_data,
+            raw_data=train_data_list
+        )
+        
     # Filter logic
     target_id = get_station_id(station)
     
     if target_id is not None and direction:
-        filtered_data = {}
-        for k, v in train_data.items():
+        filtered_data_list = []
+        for train_data in train_data_list:
             # 1. Check direction
-            if v["direction"] != direction:
+            if train_data.direction != direction:
                 continue
-            
-            current_id = get_station_id(v["arrived_station"])
+                
+            current_id = get_station_id(train_data.arrived_station)
             if current_id is None:
                 continue
-
             # 2. Check range based on direction
             # 'up' in this code means ID increasing (Toyohashi -> Maibara)
             if direction == "up":
                 if target_id - range_n <= current_id <= target_id:
-                    filtered_data[k] = v
-            # 'down' in this code means ID decreasing (Maibara -> Toyohashi)
+                    filtered_data_list.append(train_data)
             elif direction == "down":
                 if target_id <= current_id <= target_id + range_n:
-                    filtered_data[k] = v
-        
-        train_data = filtered_data
+                    filtered_data_list.append(train_data)
 
-    notice_message, train_message = write_state_message(language, train_data, notice_data, direction)
-    return {
-        "status": "delay",
-        "notice_message": notice_message,
-        "train_messages": train_message,
-        "raw_data": train_data
-    }
-
-def print_message(notice_message, train_message):
-    print("*" * 20)
-    print(notice_message)
-    print("*" * 20)
-    for message in train_message:
-        print(message)
-    print("*" * 20)
-
-if __name__ == "__main__":
-    # Test Code (CLI usage)
-    result = get_train_status_range("刈谷", range_n=6, language="ko", direction="up")
-    # result = get_train_status(language="ko", direction="up")
-    
-    if result["status"] == "normal":
-        print(result["message"])
-        print(result["data"])
-    else:
-        print_message(result["notice_message"], result["train_messages"])
+    notice_message, train_message = write_state_message(language, filtered_data_list, notice_data, direction)
+    return TrainStatusModel(
+        status="delay",
+        status_message="Some trains are delayed.",
+        notice_message=notice_message,
+        train_message=train_message,
+        notice_data=notice_data,
+        raw_data=filtered_data_list
+    )

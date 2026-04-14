@@ -1,4 +1,6 @@
 from src.constants.station_map import stationID as stations
+from src.model.model import TrainDataModel, TrainDirectionMappingModel
+from src.parse.formatting import train_rate_time_formatting, destination_formatting
 
 import os
 import sys
@@ -42,16 +44,16 @@ def set_before_to_staion_id(tps, station_id):
         Set before_passed_station_id and to_station_id based on the given train params.
 
         Args:
-            tps ( dict ): train params
+            tps ( TrainDirectionMappingModel ): train params
 
         Returns:
             before_passed_station ( str ): before station name
             to_station ( str ): to station name
             before_passed_station_id ( int ): before station id to use in get_before_station
         """
-        down_on_station_case = tps["on_station"] == "1" and tps["direction"] == "l"
-        down_not_on_station_case = tps["on_station"] == "0" and tps["direction"] == "l"
-        up_case = tps["direction"] == "r"
+        down_on_station_case = tps.on_station == "1"  and tps.direction == "l"
+        down_not_on_station_case = tps.on_station == "0" and tps.direction == "l"
+        up_case = tps.direction == "r"
 
         if down_on_station_case:
             before_passed_station_id = station_id + 1
@@ -185,69 +187,63 @@ def element_format_train_data(all_train_element):
         all_train_element ( dict ): on train data
 
     Returns:
-        train_data ( dict ): formatted train data. Filtered empty element.
-            {
-                "idx":dict, 
-                    {
-                        "train_type":str, 
-                        "train_level":int, 
-                        "direction":str, 
-                        "destination":str, 
-                        "before_passed_station":str, 
-                        "to_station":str,
-                        "train_rate_time_str":str,
-                        "arrived_station":str,
-                        "before_station_id":str
-                    }
-            }
+        train_data_list ( list[TrainDataModel] ): formatted train data. Filtered empty element.
     """
-    train_data = {}
+    train_data_list = []
     for station_id, data in all_train_element.items():
         # throw out empty element
         if not data:
             continue
 
+        station_id = int(station_id)
+
         for idx, item in enumerate(data):
             # info-1. set the train informations
             train_type = multi_replace(get_train_type(item["data"]), NEW_TRAIN_TYPE)
             train_level = get_train_level(train_type)
-            direction = item["direction"]
             
+            direction = item["direction"]
+            on_station = item["train_in"]
+
             # info-2.get the train informations
             # function parameters, it was used in before system.
-            tps = {
-                "on_station": "1" if item["train_in"] == "on" else "0",
-                "direction": "r" if direction == "up" else "l",
-                "unknown_value": ""
-            }
-            station_id = int(station_id)
+            tps = TrainDirectionMappingModel(
+                on_station=item["train_in"],
+                direction=direction
+            )
+
             # get train info
             before_passed_station, to_station, before_passed_station_id, to_station_id = set_before_to_staion_id(tps, station_id)
             arrived_station, before_station_id = get_before_station(before_passed_station_id, train_level, direction)
             next_stop, next_station_id = get_next_station(to_station_id, train_level, direction)
+
             # info-3.parse the contents
-            from src.parse.formatting import train_rate_time_formatting, destination_formatting
             destination = item["data"].find(class_=re.compile("to-station")).get_text(strip=True)
             destination = destination_formatting(destination)
             train_rate_time_str = item["data"].find(class_="delay-time").get_text(strip=True)
             train_rate_time_str = train_rate_time_formatting(train_rate_time_str)
             
             # store information
-            unit_data = {
-                "train_type": train_type,
-                "train_level": train_level,
-                "direction": direction,
-                "destination": destination,
-                "before_passed_station": before_passed_station,
-                "to_station": to_station,
-                "train_rate_time_str": train_rate_time_str,
-                "arrived_station": arrived_station,
-                "before_station_id": before_station_id,
-                "next_stop": next_stop,
-                "next_station_id": next_station_id
-            }
-            train_data[station_id] = unit_data
-    return train_data
+            train_data = TrainDataModel(
+                id=station_id,
+                train_type=train_type,
+                train_level=train_level,
+                direction=direction,
+                destination=destination,
+                before_passed_station=before_passed_station,
+                to_station=to_station,
+                train_rate_time_str=train_rate_time_str,
+                arrived_station=arrived_station,
+                before_station_id=before_station_id,
+                next_stop=next_stop,
+                next_station_id=next_station_id,
+            )
+            train_data_list.append(train_data)            
+    return train_data_list
 
-def filter_delayed(train_data):
-    return {k:v for k,v in train_data.items() if v["train_rate_time_str"]}
+def filter_delayed(train_data_list:list):
+    result = []
+    for train_data in train_data_list:
+        if train_data.train_rate_time_str:
+            result.append(train_data)
+    return result

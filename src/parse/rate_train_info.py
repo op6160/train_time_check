@@ -1,5 +1,8 @@
 from src.libs import logger
-from bs4 import BeautifulSoup # for typing
+
+# typing
+from src.model.model import NoticeDataModel, TrainDataModel
+from bs4 import BeautifulSoup
 
 from config import (
     BASE_URL,
@@ -24,34 +27,14 @@ from src.parse.notice_info import (
     list_sort_by_titile
 )
     
-def get_train_rate_and_time_info() -> tuple[bool, dict, dict]:
+def get_train_rate_and_time_info() -> tuple[bool, NoticeDataModel, list[TrainDataModel]]:
     """
     Get train rate and time information from the given html source.
 
     Returns:
-        notice_data ( dict ): notice data
-            {
-                "go_down_title":str, 
-                "go_down_info":list, 
-                "go_up_title":str, 
-                "go_up_info":list, 
-                "_rate_info":list
-            }
-        train_data ( dict ): train data
-            {
-                "idx":dict, 
-                    {
-                        "train_type":str, 
-                        "train_level":int, 
-                        "direction":str, 
-                        "destination":str, 
-                        "before_passed_station":str, 
-                        "to_station":str,
-                        "train_rate_time_str":str,
-                        "arrived_station":str,
-                        "before_station_id":str
-                    }
-            }
+        is_train_state_normal ( bool ): train state
+        notice_data ( NoticeDataModel ): notice data
+        delayed_train_data_list ( list[TrainDataModel] ): train data list
     """
     soup = get_soup_by_url(BASE_URL + STATE_URL)
     message_soup = get_soup_by_url(BASE_URL + MESSAGE_URL)
@@ -60,52 +43,42 @@ def get_train_rate_and_time_info() -> tuple[bool, dict, dict]:
     # __state_train is the remnant of the previous version. 
     # it replaced 'not delayed_train_data'.
     __state_train, notice_data, state_title = notice_data_flow(message_soup)
-    delayed_train_data = train_data_flow(soup)
-    state_train = not delayed_train_data  # == {}
+    delayed_train_data_list = train_data_flow(soup)
+    is_train_state_normal = not delayed_train_data_list  # == []
 
-    if not state_train:
-        # has delay data
-        delayed_train_data = train_data_flow(soup)
-    else:
-        # no delay data
-        notice_data = {"state_title": state_title} # state_tilte is webhook message title, in this case, other notice_data is empty.
-    return state_train, notice_data, delayed_train_data
+    # if is_train_state_normal:
+        # # no delay data
+        # notice_data.state_title = state_title # state_tilte is webhook message title, in this case, other notice_data is empty.
+    return is_train_state_normal, notice_data, delayed_train_data_list
         
 
-def notice_data_flow(soup: BeautifulSoup) -> tuple[bool, dict, str]:
+def notice_data_flow(soup: BeautifulSoup) -> tuple[bool, NoticeDataModel, str]:
     """
     Parse notice data from the soup.
 
     Returns:
         state_train ( bool ): train state
-        notice_data ( dict ): notice data
-            {
-                "go_down_title":str, 
-                "go_down_info":list, 
-                "go_up_title":str, 
-                "go_up_info":list, 
-                "_rate_info":list
-            }
+        notice_data ( NoticeDataModel ): notice data
         state_title ( str ): webhook message title
     """
-    train_state_data = get_driving_state(soup)
+    driving_state_data = get_driving_state(soup)
     # train state
-    state_train = train_state_data["driving_state_train"]
+    state_train = driving_state_data["driving_state_train"]
     # webhook message title
-    state_title = train_state_data["driving_state_title"]
+    state_title = driving_state_data["driving_state_title"]
     
     # no delay data
     if state_train:
-        return state_train, {}, state_title
+        return state_train, None, state_title # no notice data
     
     # get notice data
-    delay_info = train_state_data["rate_info"]
+    delay_info = driving_state_data["rate_info"]
     # processing
     delay_info = list_sort_by_titile(delay_info)
     notice_data = notice_data_packing(delay_info)
     return state_train, notice_data, state_title
 
-def train_data_flow(soup: BeautifulSoup) -> dict:
+def train_data_flow(soup: BeautifulSoup) -> list[TrainDataModel]:
     """
     Parse train data from the given soup object.
 
@@ -113,21 +86,7 @@ def train_data_flow(soup: BeautifulSoup) -> dict:
         soup ( BeautifulSoup ): Soup object
 
     Returns:
-        train_data ( dict ): train data
-            {
-                "idx":dict, 
-                    {
-                        "train_type":str, 
-                        "train_level":int, 
-                        "direction":str, 
-                        "destination":str, 
-                        "before_passed_station":str, 
-                        "to_station":str,
-                        "train_rate_time_str":str,
-                        "arrived_station":str,
-                        "before_station_id":str
-                    }
-            }
+        train_data_list ( list[TrainDataModel] ): train data list
     """
     # find the station elements in the soup
     on_station_elements = soup.find_all("div", class_ = "position-info-header")
@@ -143,8 +102,10 @@ def train_data_flow(soup: BeautifulSoup) -> dict:
     # find the train elements from station elements.
     all_train_element = get_all_train_element(on_station_elements, all_train_element, "on")
     all_train_element = get_all_train_element(over_station_elements, all_train_element, "over")
-
+    
     # parse the train elements
-    train_data = element_format_train_data(all_train_element)
-    delayed_train_data = filter_delayed(train_data)
-    return delayed_train_data
+    train_data_list = element_format_train_data(all_train_element)
+    print(len(train_data_list))
+    delayed_train_data_list = filter_delayed(train_data_list)
+    print(len(delayed_train_data_list))
+    return delayed_train_data_list

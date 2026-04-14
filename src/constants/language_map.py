@@ -127,7 +127,10 @@ def dict_replace(dictionary:dict, replace_map:dict)->dict:
     :return: dict
     """
     temp_str = json.dumps(dictionary, ensure_ascii=False)
-    pattern = re.compile("|".join(map(re.escape, replace_map.keys())))
+
+    # 키를 길이의 내림차순으로 정렬: "西岡崎"가 "岡崎"보다 빠르게 처리되도록 함
+    sorted_keys = sorted(replace_map.keys(), key=len, reverse=True)
+    pattern = re.compile("|".join(map(re.escape, sorted_keys)))
     temp_str = pattern.sub(lambda x: replace_map[x.group(0)], temp_str)
     return json.loads(temp_str)
 def ja_form():

@@ -1,3 +1,6 @@
+# typing
+from src.model.model import TrainStatusModel
+
 import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -21,7 +24,7 @@ def set_notify_map(language):
         logger.error(f"Unsupported language: {language}")
         sys.exit(1)
 
-def send_delay_notification(webhook_url, language, result):
+def send_delay_notification(webhook_url: str, language: str, train_status: TrainStatusModel):
     """
     Formats and sends a train delay notification.
     """
@@ -31,7 +34,7 @@ def send_delay_notification(webhook_url, language, result):
     discord = DiscordManager(webhook_url)
 
     # get train messages
-    train_messages = result.get("train_messages", [])
+    train_messages = train_status.train_message
     multiline_train_message = list_to_multiline(train_messages)
 
     if not multiline_train_message:
@@ -40,7 +43,7 @@ def send_delay_notification(webhook_url, language, result):
 
     # 
     notice_case = notify_map['delay_sender']
-    notice_msg = result.get("notice_message", "")
+    notice_msg = train_status.notice_message
     
     # message parts
     alert_title = notify_map['alert_title']
