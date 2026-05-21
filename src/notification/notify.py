@@ -27,6 +27,11 @@ def set_notify_map(language):
 def send_delay_notification(webhook_url: str, language: str, train_status: TrainStatusModel):
     """
     Formats and sends a train delay notification.
+
+    Args:
+        webhook_url (str): Discord webhook URL
+        language (str): Language code
+        train_status (TrainStatusModel): Structured response containing status and messages
     """
     # set notify map
     notify_map = set_notify_map(language)
@@ -41,7 +46,6 @@ def send_delay_notification(webhook_url: str, language: str, train_status: Train
         logger.info("Delay status detected, but no relevant trains or notices found in range. Skipping notification.")
         return
 
-    # 
     notice_case = notify_map['delay_sender']
     notice_msg = train_status.notice_message
     

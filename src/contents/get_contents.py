@@ -16,7 +16,7 @@ def get_train_status(language="ko", direction=None) -> TrainStatusModel:
         direction (str): 'up', 'down', or None
 
     Returns:
-        dict: Structured response containing status and messages.
+        TrainStatusModel: Structured response containing status and messages.
     """
     # Normalize language code if necessary (e.g., jp -> ja)
     if language == "jp": language = "ja"
@@ -55,7 +55,7 @@ def get_train_status_range(station, range_n=6, language="ko", direction=None) ->
         direction (str): 'up', 'down', or None
 
     Returns:
-        dict: Structured response with filtered train info.
+        TrainStatusModel: Structured response containing status and messages.
     """
     def get_station_id(name):
         return stations[name]["id"] if name in stations else None

@@ -74,7 +74,7 @@ def set_language_form(language):
         raise ValueError("error: language is not supported")
 
 from src.constants.language_map import dict_replace
-def write_state_message(language, train_data_list, notice_data, direction=None):
+def write_state_message(language: str, train_data_list: list[TrainDataModel], notice_data: NoticeDataModel, direction=None):
     """
     Write state message in the given language.
 
@@ -90,7 +90,7 @@ def write_state_message(language, train_data_list, notice_data, direction=None):
     notice_message = "* notice:"
     train_message = []
     
-    # TODO: notice message is not translated
+    # TODO: notice message is not translated -> Test in now
     if direction in ("up", "down"):
         direction_title = getattr(notice_data, f"go_{direction}_title", "")
         direction_info = getattr(notice_data, f"go_{direction}_info", "")
@@ -114,7 +114,7 @@ def write_state_message(language, train_data_list, notice_data, direction=None):
                 train_message.append(new_train_message)
     
     # 키를 길이의 내림차순으로 정렬: "西岡崎"가 "岡崎"보다 빠르게 처리되도록 함
-    # re 성능 최적화
+    # 반복문 대신 re 사용으로 성능 최적화, 구상대로라면 이 부분에서 번역도 되어야 함.
     sorted_keys = sorted(replace_map.keys(), key=len, reverse=True)
     pattern = re.compile("|".join(map(re.escape, sorted_keys)))
     translated_train_message = [pattern.sub(lambda m: replace_map[m.group(0)], message) for message in train_message]

@@ -105,7 +105,5 @@ def train_data_flow(soup: BeautifulSoup) -> list[TrainDataModel]:
     
     # parse the train elements
     train_data_list = element_format_train_data(all_train_element)
-    print(len(train_data_list))
     delayed_train_data_list = filter_delayed(train_data_list)
-    print(len(delayed_train_data_list))
     return delayed_train_data_list
