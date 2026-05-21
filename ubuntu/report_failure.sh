@@ -3,7 +3,7 @@
 # init path
 cd "$(dirname "$0")"
 PROJECT_ROOT=".."
-LOG_FILE="$PROJECT_ROOT/cron.log"
+LOG_FILE="~/cron.log"
 ISSUE_BODY="issue_body.md"
 
 # init repo info
