@@ -135,47 +135,49 @@ def get_all_train_element(position_info, all_train_element, train_in):
     """
     # parse the trains position info
     for station_idx, position_info_item in enumerate(position_info):
-        for idx, parent in enumerate(position_info_item):
-            # normal case
-            # throw out empty element
-            if parent.name is None:
-                continue
-            # set the direction by html structure
-            direction = "down" if idx == 0 else "up"
-            # set the station id
-            station_id = station_idx if direction == "up" else station_idx
+        station_id = str(station_idx)
+        dir_containers = []
 
-            # find the 'train' object
-            found_child = parent.select(".position-item__img")
-            # throw out empty element
-            if not found_child:
-                continue
-            
-            # special case (structure is different)
-            # 2_or_more train (-> it happens when there is a lack of space on the website.)
-            overchild = None
-            for element in found_child:
-                if "2_or_more" in element.get("src"):
-                    overchild = element
+        if train_in == "on":
+            # position-info-header: 1st container is left track (down), 2nd container is right track (up)
+            containers = position_info_item.find_all("div", class_="position-info-header__position-items")
+            if len(containers) >= 1:
+                dir_containers.append(("down", containers[0]))
+            if len(containers) >= 2:
+                dir_containers.append(("up", containers[1]))
+        else:
+            # position-info-contents: left track is down, right track is up
+            left = position_info_item.find("div", class_="position-info__left")
+            right = position_info_item.find("div", class_="position-info__right")
+            if left:
+                dir_containers.append(("down", left))
+            if right:
+                dir_containers.append(("up", right))
 
-            if overchild:
-                # add special case's child train
-                childs = overchild.select(".position-info__popup .position-item")
-                for child in childs:
-                    all_train_element[str(station_id)].append({
-                    "direction": direction,
-                    "train_in": train_in,
-                    "data": child.parent,
-                })
-            else:
-                # add normal train 
-                if found_child and station_id != -1 and overchild is None:
-                    for child in found_child:
-                        all_train_element[str(station_id)].append({
-                            "direction": direction,
-                            "train_in": train_in,
-                            "data": child.parent,
-                        })
+        for direction, container in dir_containers:
+            for p_item in container.find_all("div", class_="position-item"):
+                img = p_item.find("img", class_="position-item__img")
+                if not img:
+                    continue
+
+                # 2_or_more train case
+                if "2_or_more" in img.get("src", ""):
+                    popup_items = p_item.select(".position-info__popup .position-item")
+                    if popup_items:
+                        for child in popup_items:
+                            if child.find("img", class_="position-item__img"):
+                                all_train_element[station_id].append({
+                                    "direction": direction,
+                                    "train_in": train_in,
+                                    "data": child,
+                                })
+                else:
+                    all_train_element[station_id].append({
+                        "direction": direction,
+                        "train_in": train_in,
+                        "data": p_item,
+                    })
+
     return all_train_element
 
 def element_format_train_data(all_train_element):
@@ -218,9 +220,12 @@ def element_format_train_data(all_train_element):
             next_stop, next_station_id = get_next_station(to_station_id, train_level, direction)
 
             # info-3.parse the contents
-            destination = item["data"].find(class_=re.compile("to-station")).get_text(strip=True)
+            dest_tag = item["data"].find(class_=re.compile("to-station"))
+            destination = dest_tag.get_text(strip=True) if dest_tag else ""
             destination = destination_formatting(destination)
-            train_rate_time_str = item["data"].find(class_="delay-time").get_text(strip=True)
+            
+            delay_tag = item["data"].find(class_="delay-time")
+            train_rate_time_str = delay_tag.get_text(strip=True) if delay_tag else ""
             train_rate_time_str = train_rate_time_formatting(train_rate_time_str)
             
             # store information
