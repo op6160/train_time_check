@@ -10,6 +10,12 @@ A server or device is required.
 2. GitHub Actions: An alternative for users without a separate server environment. It can be activated by uncommenting the `cron` section in the `schedule_*.yml` files within `.github/workflows/`, and is also used for automatic debugging when the repository code is updated.
 
 ## Update History
+#### v2.1
+1.  Bug Fix
+- If the destination is up, the program incorrectly identifies the destination.
+2. Refactoring
+- Improved code structure: Moved constant packages to `src/constants`.
+
 ### v1.0
 Initial release
 
